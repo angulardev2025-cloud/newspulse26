@@ -69,7 +69,7 @@ export default function Home() {
   };
 
   const handleSourceClick = (source: NewsSource) => {
-    router.push(`/reader/${source.id}`);
+    router.push(`/reader/${source.id}`).catch(() => {});
   };
 
   if (!mounted) return null;
@@ -90,6 +90,7 @@ export default function Home() {
           onOpenSaved={() => setShowSavedModal(true)}
           viewMode={viewMode}
           setViewMode={setViewMode}
+          breadcrumbs={[{ label: viewMode === 'modern' ? 'Modern Wire' : 'Classic Wire', isCurrent: true }]}
         />
 
         <main className="max-w-5xl mx-auto px-4 py-12">
@@ -105,43 +106,58 @@ export default function Home() {
             </div>
           </div>
 
-          {viewMode === 'modern' ? (
-            <ModernSourceGrid sources={newsSources} />
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-              {/* All Feeds Card */}
-              <div 
-                onClick={() => router.push('/reader/all')} 
-                className="p-8 bg-red-600 text-white rounded-[2rem] cursor-pointer hover:scale-[1.02] active:scale-95 transition-all flex flex-col justify-between shadow-2xl shadow-red-600/20"
-              >
-                <div className="flex items-center justify-between">
-                  <LogoSVG name="ALL" logo="/assets/aistudio/images_8efc4be7.png" />
-                  <div className="px-3 py-1 bg-white/20 rounded-full text-[10px] font-bold uppercase tracking-widest backdrop-blur-md">Live Multi-Wire</div>
-                </div>
-                <div className="mt-12">
-                  <h3 className="text-2xl font-bold font-serif">ಎಲ್ಲಾ ಸುದ್ದಿಗಳು</h3>
-                  <p className="text-white/70 text-sm mt-2">Combined live feed from all Coastal & Kannada publishers.</p>
-                </div>
-              </div>
+          {(() => {
+            const query = debouncedQuery.toLowerCase().trim();
+            const filteredSources = newsSources.filter((s) => {
+              if (!query) return true;
+              return (
+                s.name.toLowerCase().includes(query) ||
+                s.kannadaName.toLowerCase().includes(query) ||
+                s.category.toLowerCase().includes(query) ||
+                s.id.toLowerCase().includes(query)
+              );
+            });
 
-              {newsSources.filter(s => s.id !== 'all').map((source) => (
-                <div 
-                  key={source.id} 
-                  onClick={() => handleSourceClick(source)} 
-                  className="group p-8 bg-white dark:bg-stone-900 rounded-[2rem] border border-stone-200 dark:border-stone-800 cursor-pointer hover:border-red-500 hover:shadow-2xl hover:shadow-red-500/5 transition-all duration-500 flex flex-col justify-between"
-                >
-                  <div className="flex items-center justify-between mb-12">
-                    <LogoSVG name={source.kannadaName} logo={source.logo} />
-                    <div className="px-2 py-1 bg-stone-100 dark:bg-stone-800 rounded-full text-[10px] font-bold uppercase tracking-widest text-stone-500">{source.category}</div>
+            return viewMode === 'modern' ? (
+              <ModernSourceGrid sources={filteredSources} />
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                {/* All Feeds Card */}
+                {!query && (
+                  <div 
+                    onClick={() => router.push('/reader/all').catch(() => {})} 
+                    className="p-8 bg-red-600 text-white rounded-[2rem] cursor-pointer hover:scale-[1.02] active:scale-95 transition-all flex flex-col justify-between shadow-2xl shadow-red-600/20"
+                  >
+                    <div className="flex items-center justify-between">
+                      <LogoSVG name="ALL" logo="/assets/aistudio/images_8efc4be7.png" />
+                      <div className="px-3 py-1 bg-white/20 rounded-full text-[10px] font-bold uppercase tracking-widest backdrop-blur-md">Live Multi-Wire</div>
+                    </div>
+                    <div className="mt-12">
+                      <h3 className="text-2xl font-bold font-serif">ಎಲ್ಲಾ ಸುದ್ದಿಗಳು</h3>
+                      <p className="text-white/70 text-sm mt-2">Combined live feed from all Coastal & Kannada publishers.</p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="font-bold text-xl group-hover:text-red-600 transition-colors font-serif">{source.kannadaName}</h3>
-                    <p className="text-sm text-stone-500 mt-2 font-medium">{source.name}</p>
+                )}
+
+                {filteredSources.filter(s => s.id !== 'all').map((source) => (
+                  <div 
+                    key={source.id} 
+                    onClick={() => handleSourceClick(source)} 
+                    className="group p-8 bg-white dark:bg-stone-900 rounded-[2rem] border border-stone-200 dark:border-stone-800 cursor-pointer hover:border-red-500 hover:shadow-2xl hover:shadow-red-500/5 transition-all duration-300 flex flex-col justify-between"
+                  >
+                    <div className="flex items-center justify-between mb-12">
+                      <LogoSVG name={source.kannadaName} logo={source.logo} />
+                      <div className="px-2 py-1 bg-stone-100 dark:bg-stone-800 rounded-full text-[10px] font-bold uppercase tracking-widest text-stone-500">{source.category}</div>
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-xl group-hover:text-red-600 transition-colors font-serif">{source.kannadaName}</h3>
+                      <p className="text-sm text-stone-500 mt-2 font-medium">{source.name}</p>
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          )}
+                ))}
+              </div>
+            );
+          })()}
         </main>
 
         <ArticleModal 

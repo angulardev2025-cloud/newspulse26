@@ -9,6 +9,7 @@ const LogoSVG = ({ name, logo }: { name: string, logo?: string }) => {
           src={logo} 
           alt={name} 
           fill 
+          sizes="48px"
           className="object-cover" 
           referrerPolicy="no-referrer" 
         />

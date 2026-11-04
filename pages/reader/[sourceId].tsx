@@ -1,5 +1,5 @@
 import { useRouter } from 'next/router';
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState } from 'react';
 import Head from 'next/head';
 import InshortsFeed from '@/components/news/inshortsFeed';
 import { newsSources, NewsSource } from '@/components/data/newsSources';
@@ -7,7 +7,20 @@ import { useNewsFeed } from '@/lib/hooks/useNewsFeed';
 import { ArrowLeft } from 'lucide-react';
 import { WordPressPost } from '@/components/data/newsTypes';
 import GoogleLoader from '@/components/utility/loader';
+import DailyRitualLoader from '@/components/utility/dailyRitualLoader';
 import Header from '@/components/header/header';
+
+const allSource: NewsSource = {
+  id: 'all',
+  name: 'All Coastal & Kannada Feeds',
+  kannadaName: 'ಎಲ್ಲಾ ಕರಾವಳಿ ಮತ್ತು ಕನ್ನಡ ಸುದ್ದಿ ಮೂಲಗಳು',
+  endpoint: '',
+  description: 'Combined live wire across all Coastal and Kannada API endpoints.',
+  category: 'General',
+  language: 'kn',
+  type: 'wordpress',
+  logo: '/assets/aistudio/images_8efc4be7.png'
+};
 
 export default function ReaderPage() {
   const router = useRouter();
@@ -46,17 +59,24 @@ export default function ReaderPage() {
   }, [darkMode, mounted]);
 
   useEffect(() => {
-    if (mounted && sourceId) {
-      const source = newsSources.find(s => s.id === sourceId);
-      if (source) {
-        setSelectedSource(source);
-        fetchMore(source.id, '', 1, false);
-      } else if (sourceId === 'all') {
-        setSelectedSource(newsSources[0]);
+    if (mounted && router.isReady && sourceId) {
+      const srcId = Array.isArray(sourceId) ? sourceId[0] : sourceId;
+      if (srcId === 'all') {
+        setSelectedSource(newsSources.find(s => s.id === 'all') || allSource);
         fetchMore('all', '', 1, false);
+      } else {
+        const source = newsSources.find(s => s.id === srcId);
+        if (source) {
+          setSelectedSource(source);
+          fetchMore(source.id, '', 1, false);
+        } else {
+          // Fallback to all if source ID is not matched
+          setSelectedSource(newsSources[0] || allSource);
+          fetchMore('all', '', 1, false);
+        }
       }
     }
-  }, [sourceId, fetchMore, mounted]);
+  }, [sourceId, router.isReady, fetchMore, mounted]);
 
   const handleToggleBookmark = (post: WordPressPost) => {
     setSavedPosts((prev) => {
@@ -78,12 +98,12 @@ export default function ReaderPage() {
     setViewMode(mode);
     if (typeof window !== 'undefined') {
       localStorage.setItem('news_view_mode', mode);
-      router.push('/');
+      router.push('/').catch(() => {});
     }
   };
 
-  // SSR Fallback
-  if (!mounted) {
+  // SSR & Router Preparation Fallback
+  if (!mounted || !router.isReady) {
     return (
       <div className="h-screen w-full bg-stone-50 dark:bg-stone-950 flex items-center justify-center">
         <GoogleLoader size="md" />
@@ -91,14 +111,28 @@ export default function ReaderPage() {
     );
   }
 
+  if (!selectedSource && loading) {
+    return <DailyRitualLoader sourceName="Live Wire" targetCount={200} />;
+  }
+
   if (!selectedSource && !loading) {
     return (
        <div className="h-screen w-full bg-stone-50 dark:bg-stone-950 flex flex-col items-center justify-center gap-4">
-         <p className="text-stone-500">Source not found or loading...</p>
-         <button onClick={() => router.push('/')} className="px-6 py-2 bg-red-600 text-white rounded-full font-bold">Back to Home</button>
+         <p className="text-stone-500 font-medium">Source not found or loading...</p>
+         <button 
+           onClick={() => router.push('/').catch(() => {})} 
+           className="px-6 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-full font-bold shadow-md transition-all"
+         >
+           Back to Home Page
+         </button>
        </div>
     );
   }
+
+  const breadcrumbs = [
+    { label: 'Feeds', href: '/' },
+    { label: selectedSource?.kannadaName || selectedSource?.name || 'News Reader', isCurrent: true },
+  ];
 
   return (
     <>
@@ -115,11 +149,12 @@ export default function ReaderPage() {
           onOpenSaved={() => {}} 
           viewMode={viewMode}
           setViewMode={handleViewChange}
+          breadcrumbs={breadcrumbs}
         />
 
         <div className="flex-1 relative overflow-hidden">
           <button 
-            onClick={() => router.push('/')}
+            onClick={() => router.push('/').catch(() => {})}
             className="fixed bottom-safe mb-20 right-6 z-50 p-4 bg-red-600 text-white rounded-full shadow-2xl active:scale-90 transition-transform lg:hidden"
             aria-label="Back to home"
           >

@@ -18,13 +18,17 @@ export const useNewsFeed = () => {
     setError(null);
     try {
       const data = await fetchNewsFeed(sourceId, searchQuery, page);
-      if (data.length === 0) {
+      if (!data || data.length === 0) {
         setHasMore(false);
+        if (!append) {
+          setError('nothing to show to back to home page');
+        }
       } else {
         setPosts((prev) => (append ? [...prev, ...data] : data));
       }
-    } catch (err) {
-      setError('Failed to fetch news.');
+    } catch (err: any) {
+      setError('nothing to show to back to home page');
+      setHasMore(false);
     } finally {
       setLoading(false);
     }
