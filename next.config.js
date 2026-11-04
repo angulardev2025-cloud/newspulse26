@@ -1,7 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  output: 'standalone',
   async rewrites() {
     return [
       {
@@ -22,5 +21,3 @@ const nextConfig = {
 }
 
 module.exports = nextConfig
-
-// Image Optimizations of becouse on vercel free plan quota is limited to 1000 images only

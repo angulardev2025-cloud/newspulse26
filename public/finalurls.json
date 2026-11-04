@@ -1,0 +1,27 @@
+{
+  "application": "My News App",
+  "description": "Complete consolidated file of proxy configurations, Vercel routing rewrites, WordPress RSS/REST endpoints, and absolute service endpoints.",
+  "endpoints": [
+    { "id": "liquide", "name": "Liquide News API", "kannadaName": "ಲಿಕ್ವಿಡ್ ನ್ಯೂಸ್ API", "url": "https://api.v2.liquide.life/api/news?page=1&limit=10", "category": "Finance" },
+    { "id": "tv9", "name": "TV9 Kannada", "kannadaName": "ಟಿವಿ೯ ಕನ್ನಡ", "url": "https://tv9kannada.com/wp-json/wp/v2/posts?per_page=15&_embed=true", "category": "News" },
+    { "id": "public-tv", "name": "Public TV", "kannadaName": "ಪಬ್ಲಿಕ್ ಟಿವಿ", "url": "https://publictv.in/wp-json/wp/v2/posts?per_page=15&_embed=true", "category": "News" },
+    { "id": "vijayavani", "name": "Vijayavani", "kannadaName": "ವಿಜಯವಾಣಿ", "url": "https://www.vijayavani.net/wp-json/wp/v2/posts?per_page=15&_embed=true", "category": "Newspaper" },
+    { "id": "lallantop", "name": "The Lallantop", "kannadaName": "ದಿ ಲಲ್ಲಂಟಾಪ್", "url": "https://api.thelallantop.com/api/v1/posts?per_page=10", "category": "National" },
+    { "id": "espn", "name": "ESPN Sports", "kannadaName": "ಇಎಸ್‌ಪಿಎನ್ ಕ್ರೀಡೆ", "url": "https://site.api.espn.com/apis/site/v2/sports/news?limit=10", "category": "Sports" },
+    { "id": "cnbc", "name": "CNBC TV18", "kannadaName": "ಸಿಎನ್‌ಬಿಸಿ ಟಿವಿ೧೮", "url": "https://api-en.cnbctv18.com/api/v1/news?limit=10", "category": "Business" },
+    { "id": "ottplay", "name": "OTTPlay", "kannadaName": "ಒಟಿಟಿಪ್ಲೇ ಮನರಂಜನೆ", "url": "https://api2.ottplay.com/v1/news?limit=10", "category": "Entertainment" },
+    { "id": "udupi-express", "name": "Udupi Express", "kannadaName": "ಉಡುಪಿ ಎಕ್ಸ್‌ಪ್ರೆಸ್", "url": "https://udupixpress.com/wp-json/wp/v2/posts?per_page=10&_embed=true", "category": "Coastal" },
+    { "id": "nammurexpress", "name": "Nammur Express", "kannadaName": "ನಮ್ಮೂರ್ ಎಕ್ಸ್‌ಪ್ರೆಸ್", "url": "https://nammurexpress.in/wp-json/wp/v2/posts?per_page=10&_embed=true", "category": "Local" },
+    { "id": "udupi-times", "name": "Udupi Times", "kannadaName": "ಉಡುಪಿ ಟೈಮ್ಸ್", "url": "https://udupitimes.com/wp-json/wp/v2/posts?per_page=10&_embed=true", "category": "Coastal" },
+    { "id": "dvgsuddi", "name": "DVG Suddi", "kannadaName": "ಡಿವಿಜಿ ಸುದ್ದಿ", "url": "https://dvgsuddi.com/wp-json/wp/v2/posts?per_page=10&_embed=true", "category": "Regional" },
+    { "id": "hosakannada", "name": "Hosa Kannada", "kannadaName": "ಹೊಸ ಕನ್ನಡ", "url": "https://hosakannada.com/wp-json/wp/v2/posts?per_page=10&_embed=true", "category": "Digital" },
+    { "id": "mangalorean", "name": "Mangalorean", "kannadaName": "ಮಂಗಳೂರಿಯನ್", "url": "https://www.mangalorean.com/wp-json/wp/v2/posts?per_page=10&_embed=true", "category": "Coastal" },
+    { "id": "mangaloremirror", "name": "The Mangalore Mirror", "kannadaName": "ಮಂಗಳೂರು ಮಿರರ್", "url": "https://themangaloremirror.in/wp-json/wp/v2/posts?per_page=10&_embed=true", "category": "Coastal" },
+    { "id": "suddinews", "name": "Belthangady Suddi", "kannadaName": "ಬೆಳ್ತಂಗಡಿ ಸುದ್ದಿ", "url": "https://belthangady.suddinews.com/wp-json/wp/v2/posts?per_page=10&_embed=true", "category": "Local" },
+    { "id": "kahalenews", "name": "Kahale News", "kannadaName": "ಕಾಹಳೆ ಸುದ್ದಿ", "url": "https://www.kahalenews.com/wp-json/wp/v2/posts?per_page=10&_embed=true", "category": "News" },
+    { "id": "tulunadu", "name": "Tulunadu Varthe", "kannadaName": "ತುಳುನಾಡು ವಾರ್ತೆ", "url": "https://tulunaduvarthe.com/wp-json/wp/v2/posts?per_page=10&_embed=true", "category": "Coastal" },
+    { "id": "vishwanews", "name": "Vishwa News 24", "kannadaName": "ವಿಶ್ವ ನ್ಯೂಸ್ ೨೪", "url": "https://www.vishwanews24.com/wp-json/wp/v2/posts?per_page=10&_embed=true", "category": "Global" },
+    { "id": "npnewz", "name": "NP Newz", "kannadaName": "ಎನ್ಪಿ ನ್ಯೂಸ್", "url": "https://npnewz.com/wp-json/wp/v2/posts?per_page=10&_embed=true", "category": "Digital" },
+    { "id": "prajavani", "name": "Prajavani", "kannadaName": "ಪ್ರಜಾವಾಣಿ", "url": "https://www.prajavani.net/wp-json/wp/v2/posts?per_page=10&_embed=true", "category": "Newspaper" }
+  ]
+}
