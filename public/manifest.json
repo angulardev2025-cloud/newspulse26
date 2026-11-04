@@ -1,8 +1,8 @@
 {
   "id": "/",
-  "name": "NewsPulse Karnataka & Global Wire",
+  "name": "NewsPulse Coastal & Kannada",
   "short_name": "NewsPulse",
-  "description": "Multi-source Kannada & Global news aggregator with Inshorts card view and offline PWA support.",
+  "description": "Premium Inshorts-style news reader for Coastal Karnataka and Kannada news.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

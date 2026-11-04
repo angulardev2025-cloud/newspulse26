@@ -20,6 +20,7 @@
     "eslint-config-next": "13.2.4",
     "lucide-react": "^1.64.0",
     "moment": "^2.29.4",
+    "motion": "^14.9.1",
     "next": "13.2.4",
     "node-cache": "^5.1.2",
     "react": "18.2.0",

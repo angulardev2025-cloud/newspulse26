@@ -39,4 +39,19 @@
     .description{
         @apply mt-3 text-[1.5rem] md:text-2xl font-medium;
     }
+
+    .hide-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+    .hide-scrollbar::-webkit-scrollbar {
+        display: none;
+    }
+
+    .top-safe {
+        padding-top: env(safe-area-inset-top);
+    }
+    .bottom-safe {
+        padding-bottom: env(safe-area-inset-bottom);
+    }
 }

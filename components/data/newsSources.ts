@@ -12,23 +12,13 @@ export interface NewsSource {
 export const newsSources: NewsSource[] = [
   {
     id: 'all',
-    name: 'All Aggregated Feeds',
-    kannadaName: 'ಎಲ್ಲಾ ಸುದ್ದಿ ಮೂಲಗಳು',
+    name: 'All Coastal & Kannada Feeds',
+    kannadaName: 'ಎಲ್ಲಾ ಕರಾವಳಿ ಮತ್ತು ಕನ್ನಡ ಸುದ್ದಿ ಮೂಲಗಳು',
     endpoint: '',
-    description: 'Combined live wire across all absolute API endpoints.',
+    description: 'Combined live wire across all Coastal and Kannada API endpoints.',
     category: 'General',
     language: 'kn',
     type: 'wordpress'
-  },
-  {
-    id: 'liquide',
-    name: 'Liquide News API',
-    kannadaName: 'ಲಿಕ್ವಿಡ್ ನ್ಯೂಸ್ API',
-    endpoint: 'https://api.v2.liquide.life/api/news?page=1&limit=10',
-    description: 'Financial and market news updates from Liquide.',
-    category: 'Finance',
-    language: 'en',
-    type: 'rest'
   },
   {
     id: 'tv9',
@@ -61,44 +51,14 @@ export const newsSources: NewsSource[] = [
     type: 'wordpress'
   },
   {
-    id: 'lallantop',
-    name: 'The Lallantop',
-    kannadaName: 'ದಿ ಲಲ್ಲಂಟಾಪ್',
-    endpoint: 'https://api.thelallantop.com/api/v1/posts?per_page=10',
-    description: 'National political analysis.',
-    category: 'National',
+    id: 'prajavani',
+    name: 'Prajavani',
+    kannadaName: 'ಪ್ರಜಾವಾಣಿ',
+    endpoint: 'https://www.prajavani.net/wp-json/wp/v2/posts?per_page=15&_embed=true',
+    description: 'Kannada daily.',
+    category: 'Newspaper',
     language: 'kn',
-    type: 'rest'
-  },
-  {
-    id: 'espn',
-    name: 'ESPN Sports',
-    kannadaName: 'ಇಎಸ್‌ಪಿಎನ್ ಕ್ರೀಡೆ',
-    endpoint: 'https://site.api.espn.com/apis/site/v2/sports/news?limit=10',
-    description: 'Global sports news.',
-    category: 'Sports',
-    language: 'en',
-    type: 'rest'
-  },
-  {
-    id: 'cnbc',
-    name: 'CNBC TV18',
-    kannadaName: 'ಸಿಎನ್‌ಬಿಸಿ ಟಿವಿ೧೮',
-    endpoint: 'https://api-en.cnbctv18.com/api/v1/news?limit=10',
-    description: 'Business news and insights.',
-    category: 'Business',
-    language: 'en',
-    type: 'rest'
-  },
-  {
-    id: 'ottplay',
-    name: 'OTTPlay',
-    kannadaName: 'ಒಟಿಟಿಪ್ಲೇ ಮನರಂಜನೆ',
-    endpoint: 'https://api2.ottplay.com/v1/news?limit=10',
-    description: 'Entertainment and streaming reviews.',
-    category: 'Entertainment',
-    language: 'en',
-    type: 'rest'
+    type: 'wordpress'
   },
   {
     id: 'udupi-express',
@@ -111,42 +71,12 @@ export const newsSources: NewsSource[] = [
     type: 'wordpress'
   },
   {
-    id: 'nammurexpress',
-    name: 'Nammur Express',
-    kannadaName: 'ನಮ್ಮೂರ್ ಎಕ್ಸ್‌ಪ್ರೆಸ್',
-    endpoint: 'https://nammurexpress.in/wp-json/wp/v2/posts?per_page=10&_embed=true',
-    description: 'Local Karnataka district news.',
-    category: 'Local',
-    language: 'kn',
-    type: 'wordpress'
-  },
-  {
     id: 'udupi-times',
     name: 'Udupi Times',
     kannadaName: 'ಉಡುಪಿ ಟೈಮ್ಸ್',
     endpoint: 'https://udupitimes.com/wp-json/wp/v2/posts?per_page=10&_embed=true',
     description: 'Udupi regional news.',
     category: 'Coastal',
-    language: 'kn',
-    type: 'wordpress'
-  },
-  {
-    id: 'dvgsuddi',
-    name: 'DVG Suddi',
-    kannadaName: 'ಡಿವಿಜಿ ಸುದ್ದಿ',
-    endpoint: 'https://dvgsuddi.com/wp-json/wp/v2/posts?per_page=10&_embed=true',
-    description: 'Davangere news.',
-    category: 'Regional',
-    language: 'kn',
-    type: 'wordpress'
-  },
-  {
-    id: 'hosakannada',
-    name: 'Hosa Kannada',
-    kannadaName: 'ಹೊಸ ಕನ್ನಡ',
-    endpoint: 'https://hosakannada.com/wp-json/wp/v2/posts?per_page=10&_embed=true',
-    description: 'Digital analysis.',
-    category: 'Digital',
     language: 'kn',
     type: 'wordpress'
   },
@@ -171,26 +101,6 @@ export const newsSources: NewsSource[] = [
     type: 'wordpress'
   },
   {
-    id: 'suddinews',
-    name: 'Belthangady Suddi',
-    kannadaName: 'ಬೆಳ್ತಂಗಡಿ ಸುದ್ದಿ',
-    endpoint: 'https://belthangady.suddinews.com/wp-json/wp/v2/posts?per_page=10&_embed=true',
-    description: 'Belthangady updates.',
-    category: 'Local',
-    language: 'kn',
-    type: 'wordpress'
-  },
-  {
-    id: 'kahalenews',
-    name: 'Kahale News',
-    kannadaName: 'ಕಾಹಳೆ ಸುದ್ದಿ',
-    endpoint: 'https://www.kahalenews.com/wp-json/wp/v2/posts?per_page=10&_embed=true',
-    description: 'Investigative stories.',
-    category: 'News',
-    language: 'kn',
-    type: 'wordpress'
-  },
-  {
     id: 'tulunadu',
     name: 'Tulunadu Varthe',
     kannadaName: 'ತುಳುನಾಡು ವಾರ್ತೆ',
@@ -201,32 +111,22 @@ export const newsSources: NewsSource[] = [
     type: 'wordpress'
   },
   {
-    id: 'vishwanews',
-    name: 'Vishwa News 24',
-    kannadaName: 'ವಿಶ್ವ ನ್ಯೂಸ್ ೨೪',
-    endpoint: 'https://www.vishwanews24.com/wp-json/wp/v2/posts?per_page=10&_embed=true',
-    description: 'Global news.',
-    category: 'Global',
+    id: 'suddinews',
+    name: 'Belthangady Suddi',
+    kannadaName: 'ಬೆಳ್ತಂಗಡಿ ಸುದ್ದಿ',
+    endpoint: 'https://belthangady.suddinews.com/wp-json/wp/v2/posts?per_page=10&_embed=true',
+    description: 'Belthangady updates.',
+    category: 'Local',
     language: 'kn',
     type: 'wordpress'
   },
   {
-    id: 'npnewz',
-    name: 'NP Newz',
-    kannadaName: 'ಎನ್ಪಿ ನ್ಯೂಸ್',
-    endpoint: 'https://npnewz.com/wp-json/wp/v2/posts?per_page=10&_embed=true',
-    description: 'National updates.',
+    id: 'hosakannada',
+    name: 'Hosa Kannada',
+    kannadaName: 'ಹೊಸ ಕನ್ನಡ',
+    endpoint: 'https://hosakannada.com/wp-json/wp/v2/posts?per_page=10&_embed=true',
+    description: 'Digital analysis.',
     category: 'Digital',
-    language: 'kn',
-    type: 'wordpress'
-  },
-  {
-    id: 'prajavani',
-    name: 'Prajavani',
-    kannadaName: 'ಪ್ರಜಾವಾಣಿ',
-    endpoint: 'https://www.prajavani.net/wp-json/wp/v2/posts?per_page=10&_embed=true',
-    description: 'Kannada daily.',
-    category: 'Newspaper',
     language: 'kn',
     type: 'wordpress'
   }

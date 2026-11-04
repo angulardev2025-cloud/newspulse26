@@ -1,6 +1,5 @@
 import Head from 'next/head';
 import React, { useEffect, useState, useCallback } from 'react';
-import InshortsFeed, { WordPressPost } from '@/components/news/inshortsFeed';
 import Footer from '@/components/footer/footer';
 import Search from '@/components/search/serach';
 import Header from '@/components/header/header';
@@ -8,30 +7,39 @@ import ArticleModal from '@/components/news/articleModal';
 import { useDebounce } from '@/components/utility/useDebounce';
 import { OfflineIndicator } from '@/components/utility/pwaInstall';
 import { newsSources, NewsSource } from '@/components/data/newsSources';
-import axios from 'axios';
-import { Newspaper, ArrowLeft, Globe, Radio } from 'lucide-react';
-import { NewsItem } from '@/components/data/newsTypes';
+import { useNewsFeed } from '@/lib/hooks/useNewsFeed';
+import LogoSVG from '@/components/utility/logo';
+import { ArrowLeft, Globe, Newspaper } from 'lucide-react';
+import { useRouter } from 'next/router';
+import { NewsItem, WordPressPost } from '@/components/data/newsTypes';
+import ModernSourceGrid from '@/components/news/modernSourceGrid';
 
 export default function Home() {
+  const router = useRouter();
   const [mounted, setMounted] = useState(false);
-  const [selectedSource, setSelectedSource] = useState<NewsSource | null>(null);
-  const [posts, setPosts] = useState<WordPressPost[]>([]);
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
+  const { posts, loading, hasMore, fetchMore } = useNewsFeed();
   const [searchQuery, setSearchQuery] = useState("");
   const debouncedQuery = useDebounce(searchQuery, 400);
-  const [loading, setLoading] = useState(false);
-
   const [selectedArticle, setSelectedArticle] = useState<NewsItem | null>(null);
   const [savedPosts, setSavedPosts] = useState<WordPressPost[]>([]);
   const [showSavedModal, setShowSavedModal] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
+  const [viewMode, setViewMode] = useState<'classic' | 'modern'>('classic');
 
   useEffect(() => {
     setMounted(true);
     const stored = localStorage.getItem('tv9_saved_posts');
     if (stored) setSavedPosts(JSON.parse(stored));
+    
+    const storedView = localStorage.getItem('news_view_mode') as 'classic' | 'modern';
+    if (storedView) setViewMode(storedView);
   }, []);
+
+  useEffect(() => {
+    if (mounted) {
+      localStorage.setItem('news_view_mode', viewMode);
+    }
+  }, [viewMode, mounted]);
 
   useEffect(() => {
     if (mounted) {
@@ -49,104 +57,94 @@ export default function Home() {
     });
   };
 
-  const fetchPosts = useCallback(async (pageNum = 1, append = false) => {
-    if (!append) setLoading(true);
-    try {
-      const res = await axios.get('/api/posts', {
-        params: {
-          source: selectedSource ? selectedSource.id : 'all',
-          search: debouncedQuery,
-          page: pageNum,
-        },
-      });
-      const newPosts = res.data || [];
-      if (newPosts.length === 0) setHasMore(false);
-      else setPosts((prev) => (append ? [...prev, ...newPosts] : newPosts));
-    } catch (err) {
-      console.error('Failed to fetch posts:', err);
-    } finally {
-      setLoading(false);
-    }
-  }, [selectedSource, debouncedQuery]);
-
-  useEffect(() => {
-    setPage(1);
-    setHasMore(true);
-    fetchPosts(1, false);
-  }, [selectedSource, debouncedQuery, fetchPosts]);
-
-  const loadMorePosts = () => {
-    if (loading || !hasMore) return;
-    const nextPage = page + 1;
-    setPage(nextPage);
-    fetchPosts(nextPage, true);
-  };
-
-  const convertToNewsItem = (post: WordPressPost): NewsItem => {
-    const stripHtml = (html: string) => (html ? html.replace(/<\/?[^>]+(>|$)/g, '') : '');
-    return {
-      name: stripHtml(post.title.rendered),
-      url: post.link,
-      image: { thumbnail: { contentUrl: post._embedded?.['wp:featuredmedia']?.[0]?.source_url || '/assets/aistudio/image_a4df1d8f.png' } },
-      description: stripHtml(post.excerpt.rendered),
-      datePublished: post.date,
-      provider: [{ name: selectedSource ? selectedSource.name : 'NewsPulse' }],
-      content: stripHtml(post.content?.rendered || post.excerpt.rendered),
-    };
+  const handleSourceClick = (source: NewsSource) => {
+    router.push(`/reader/${source.id}`);
   };
 
   if (!mounted) return null;
 
   return (
-    <div className="min-h-screen bg-[#FBF9F5] dark:bg-stone-950 text-stone-900 dark:text-stone-100 font-sans">
-      <Header
-        darkMode={darkMode}
-        setDarkMode={setDarkMode}
-        savedCount={savedPosts.length}
-        onOpenSaved={() => setShowSavedModal(true)}
-      />
+    <>
+      <Head>
+        <title>NewsPulse: Coastal & Kannada News</title>
+        <meta name="description" content="Premium Inshorts-style news reader for Coastal Karnataka and Kannada news." />
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0, viewport-fit=cover" />
+      </Head>
+      
+      <div className="min-h-screen bg-[#FBF9F5] dark:bg-stone-950 text-stone-900 dark:text-stone-100 font-sans transition-colors duration-500">
+        <Header
+          darkMode={darkMode}
+          setDarkMode={setDarkMode}
+          savedCount={savedPosts.length}
+          onOpenSaved={() => setShowSavedModal(true)}
+          viewMode={viewMode}
+          setViewMode={setViewMode}
+        />
 
-      <main className="max-w-5xl mx-auto px-4 py-6">
-        {selectedSource ? (
-          <div className="flex items-center gap-4 mb-6">
-            <button onClick={() => setSelectedSource(null)} className="p-2 bg-stone-100 dark:bg-stone-800 rounded-xl">
-              <ArrowLeft className="w-5 h-5" />
-            </button>
-            <h1 className="text-2xl font-bold">{selectedSource.kannadaName}</h1>
+        <main className="max-w-5xl mx-auto px-4 py-12">
+          <div className="text-center mb-16">
+            <h1 className="text-5xl md:text-7xl font-serif font-black mb-6 tracking-tighter text-stone-900 dark:text-stone-100">
+              ಸುದ್ದಿ ಪಲ್ಸ್
+            </h1>
+            <p className="text-stone-500 dark:text-stone-400 text-lg md:text-xl max-w-2xl mx-auto font-medium">
+              Coastal Karnataka & Kannada News — Real-time editorial wire powered by NewsPulse.
+            </p>
+            <div className="mt-10 max-w-xl mx-auto">
+              <Search searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
+            </div>
           </div>
-        ) : (
-          <div className="text-center py-12">
-            <h1 className="text-4xl font-bold mb-6">ಸುದ್ದಿ ಪಲ್ಸ್ — ಸುದ್ದಿ ಮೂಲಗಳು</h1>
-            <Search searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
-          </div>
-        )}
 
-        {!selectedSource ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
-            {newsSources.map((source) => (
-              <div key={source.id} onClick={() => setSelectedSource(source)} className="p-6 bg-white dark:bg-stone-900 rounded-2xl cursor-pointer hover:border-red-500 border border-transparent">
-                <h3 className="text-lg font-bold">{source.kannadaName}</h3>
-                <p className="text-xs text-stone-500">{source.category} | {source.language.toUpperCase()}</p>
+          {viewMode === 'modern' ? (
+            <ModernSourceGrid sources={newsSources} />
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+              {/* All Feeds Card */}
+              <div 
+                onClick={() => router.push('/reader/all')} 
+                className="p-8 bg-red-600 text-white rounded-[2rem] cursor-pointer hover:scale-[1.02] active:scale-95 transition-all flex flex-col justify-between shadow-2xl shadow-red-600/20"
+              >
+                <div className="flex items-center justify-between">
+                  <LogoSVG name="ALL" />
+                  <div className="px-3 py-1 bg-white/20 rounded-full text-[10px] font-bold uppercase tracking-widest backdrop-blur-md">Live Multi-Wire</div>
+                </div>
+                <div className="mt-12">
+                  <h3 className="text-2xl font-bold font-serif">ಎಲ್ಲಾ ಸುದ್ದಿಗಳು</h3>
+                  <p className="text-white/70 text-sm mt-2">Combined live feed from all Coastal & Kannada publishers.</p>
+                </div>
               </div>
-            ))}
-          </div>
-        ) : (
-          <InshortsFeed
-            posts={posts}
-            savedPosts={savedPosts}
-            onToggleBookmark={handleToggleBookmark}
-            onSelectPost={(post) => setSelectedArticle(convertToNewsItem(post))}
-            onLoadMore={loadMorePosts}
-            hasMore={hasMore}
-            loadingMore={loading}
-            sourceName={selectedSource.kannadaName}
-            language={selectedSource.language}
-          />
-        )}
-      </main>
-      <ArticleModal article={selectedArticle} onClose={() => setSelectedArticle(null)} isBookmarked={selectedArticle ? savedPosts.some((s) => s.link === selectedArticle.url) : false} onToggleBookmark={(art) => { const match = posts.find((p) => p.link === art.url); if (match) handleToggleBookmark(match); }} />
-      <OfflineIndicator />
-      <Footer />
-    </div>
+
+              {newsSources.filter(s => s.id !== 'all').map((source) => (
+                <div 
+                  key={source.id} 
+                  onClick={() => handleSourceClick(source)} 
+                  className="group p-8 bg-white dark:bg-stone-900 rounded-[2rem] border border-stone-200 dark:border-stone-800 cursor-pointer hover:border-red-500 hover:shadow-2xl hover:shadow-red-500/5 transition-all duration-500 flex flex-col justify-between"
+                >
+                  <div className="flex items-center justify-between mb-12">
+                    <LogoSVG name={source.kannadaName} />
+                    <div className="px-2 py-1 bg-stone-100 dark:bg-stone-800 rounded-full text-[10px] font-bold uppercase tracking-widest text-stone-500">{source.category}</div>
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-xl group-hover:text-red-600 transition-colors font-serif">{source.kannadaName}</h3>
+                    <p className="text-sm text-stone-500 mt-2 font-medium">{source.name}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </main>
+
+        <ArticleModal 
+          article={selectedArticle} 
+          onClose={() => setSelectedArticle(null)} 
+          isBookmarked={selectedArticle ? savedPosts.some((s) => s.link === selectedArticle.url) : false} 
+          onToggleBookmark={(art) => { 
+              const match = savedPosts.find((p) => p && p.link === art.url);
+              if (match) handleToggleBookmark(match); 
+          }} 
+        />
+        <OfflineIndicator />
+        <Footer />
+      </div>
+    </>
   );
 }
