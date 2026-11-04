@@ -5,7 +5,8 @@ import { Bookmark, Share2, ExternalLink, Clock, Check, ChevronUp, ChevronDown } 
 import { dateFormat } from '../utility/dateFormat';
 import { WordPressPost } from '@/components/data/newsTypes';
 import Image from 'next/image';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence } from 'framer-motion';
+import GoogleLoader from '../utility/loader';
 
 interface InshortsFeedProps {
   posts: WordPressPost[];
@@ -59,7 +60,7 @@ const ArticleCard = ({
   const fullText = (excerpt + ' ' + content).split(/\s+/).slice(0, 80).join(' ');
 
   return (
-    <div className="relative h-[100dvh] w-full snap-start flex flex-col bg-white dark:bg-stone-950 overflow-hidden">
+    <div className="relative h-screen h-[100dvh] w-full snap-start flex flex-col bg-white dark:bg-stone-950 overflow-hidden">
       {/* Featured Image Section (35-45%) */}
       <div className="relative w-full h-[40vh] min-h-[300px] bg-stone-200 dark:bg-stone-800">
         {featuredMedia ? (
@@ -202,11 +203,11 @@ export default function InshortsFeed({
 
   if (!posts || posts.length === 0) {
     return (
-      <div className="h-[100dvh] flex items-center justify-center text-stone-500 bg-white dark:bg-stone-950 px-6 text-center">
+      <div className="h-screen h-[100dvh] flex items-center justify-center text-stone-500 bg-white dark:bg-stone-950 px-6 text-center">
         {loadingMore ? (
-          <div className="flex flex-col items-center gap-4">
-            <div className="w-10 h-10 border-4 border-red-600/20 border-t-red-600 rounded-full animate-spin" />
-            <p className="text-sm font-medium animate-pulse">Loading latest news...</p>
+          <div className="flex flex-col items-center gap-6">
+            <GoogleLoader size="lg" />
+            <p className="text-sm font-bold tracking-widest uppercase animate-pulse">Initializing Feed...</p>
           </div>
         ) : (
           <p>{language === 'kn' ? 'ಯಾವುದೇ ಸುದ್ದಿ ಲಭ್ಯವಿಲ್ಲ' : 'No news found'}</p>
@@ -218,7 +219,7 @@ export default function InshortsFeed({
   return (
     <div 
       ref={containerRef}
-      className="h-[100dvh] w-full overflow-y-auto snap-y snap-mandatory scroll-smooth hide-scrollbar bg-black"
+      className="h-screen h-[100dvh] w-full overflow-y-auto snap-y snap-mandatory scroll-smooth hide-scrollbar bg-black"
     >
       <div className="max-w-2xl mx-auto shadow-2xl relative">
         {posts.map((post, index) => (
@@ -237,8 +238,8 @@ export default function InshortsFeed({
         ))}
         
         {loadingMore && (
-          <div className="h-20 flex items-center justify-center bg-white dark:bg-stone-950">
-            <div className="w-6 h-6 border-2 border-red-600/20 border-t-red-600 rounded-full animate-spin" />
+          <div className="h-32 flex items-center justify-center bg-white dark:bg-stone-950 border-t border-stone-100 dark:border-stone-800">
+            <GoogleLoader size="md" />
           </div>
         )}
       </div>

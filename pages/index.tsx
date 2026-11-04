@@ -1,7 +1,7 @@
 import Head from 'next/head';
 import React, { useEffect, useState, useCallback } from 'react';
 import Footer from '@/components/footer/footer';
-import Search from '@/components/search/serach';
+import Search from '@/components/search/search';
 import Header from '@/components/header/header';
 import ArticleModal from '@/components/news/articleModal';
 import { useDebounce } from '@/components/utility/useDebounce';
@@ -28,11 +28,22 @@ export default function Home() {
 
   useEffect(() => {
     setMounted(true);
-    const stored = localStorage.getItem('tv9_saved_posts');
-    if (stored) setSavedPosts(JSON.parse(stored));
+    try {
+      const stored = localStorage.getItem('tv9_saved_posts');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed)) setSavedPosts(parsed);
+      }
+    } catch (e) {
+      console.error('Failed to load saved posts:', e);
+    }
     
-    const storedView = localStorage.getItem('news_view_mode') as 'classic' | 'modern';
-    if (storedView) setViewMode(storedView);
+    try {
+      const storedView = localStorage.getItem('news_view_mode') as 'classic' | 'modern';
+      if (storedView === 'classic' || storedView === 'modern') setViewMode(storedView);
+    } catch (e) {
+      console.error('Failed to load view mode:', e);
+    }
   }, []);
 
   useEffect(() => {

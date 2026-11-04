@@ -7,6 +7,10 @@ import { useNewsFeed } from '@/lib/hooks/useNewsFeed';
 import { ArrowLeft, Share2 } from 'lucide-react';
 import { WordPressPost } from '@/components/data/newsTypes';
 
+import GoogleLoader from '@/components/utility/loader';
+
+import Header from '@/components/header/header';
+
 export default function ReaderPage() {
   const router = useRouter();
   const { sourceId } = router.query;
@@ -14,12 +18,33 @@ export default function ReaderPage() {
   const [selectedSource, setSelectedSource] = useState<NewsSource | null>(null);
   const [savedPosts, setSavedPosts] = useState<WordPressPost[]>([]);
   const [mounted, setMounted] = useState(false);
+  const [darkMode, setDarkMode] = useState(false);
+  const [viewMode, setViewMode] = useState<'classic' | 'modern'>('classic');
 
   useEffect(() => {
     setMounted(true);
-    const stored = localStorage.getItem('tv9_saved_posts');
-    if (stored) setSavedPosts(JSON.parse(stored));
+    try {
+      const stored = localStorage.getItem('tv9_saved_posts');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed)) setSavedPosts(parsed);
+      }
+    } catch (e) {
+      console.error('Failed to load saved posts:', e);
+    }
+    
+    try {
+      const storedView = localStorage.getItem('news_view_mode') as 'classic' | 'modern';
+      if (storedView) setViewMode(storedView);
+    } catch (e) {}
   }, []);
+
+  useEffect(() => {
+    if (mounted) {
+      if (darkMode) document.documentElement.classList.add('dark');
+      else document.documentElement.classList.remove('dark');
+    }
+  }, [darkMode, mounted]);
 
   useEffect(() => {
     if (sourceId) {
@@ -53,7 +78,7 @@ export default function ReaderPage() {
   if (!mounted || !selectedSource) {
     return (
       <div className="h-screen w-full flex items-center justify-center bg-stone-50 dark:bg-stone-950">
-        <div className="w-8 h-8 border-4 border-red-600/20 border-t-red-600 rounded-full animate-spin" />
+        <GoogleLoader size="md" />
       </div>
     );
   }
@@ -65,26 +90,41 @@ export default function ReaderPage() {
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0, viewport-fit=cover" />
       </Head>
 
-      <div className="h-screen w-full overflow-hidden bg-black">
-        {/* Floating Back Button */}
-        <button 
-          onClick={() => router.back()}
-          className="fixed top-safe mt-4 left-4 z-50 p-3 bg-black/20 backdrop-blur-xl border border-white/10 rounded-full text-white shadow-2xl active:scale-90 transition-transform lg:mt-8 lg:left-8"
-          aria-label="Go back"
-        >
-          <ArrowLeft className="w-6 h-6" />
-        </button>
-
-        <InshortsFeed
-          posts={posts}
-          savedPosts={savedPosts}
-          onToggleBookmark={handleToggleBookmark}
-          onLoadMore={loadMore}
-          hasMore={hasMore}
-          loadingMore={loading}
-          sourceName={selectedSource?.kannadaName}
-          language={selectedSource?.language as 'kn' | 'en'}
+      <div className="h-screen w-full overflow-hidden flex flex-col bg-white dark:bg-black transition-colors duration-500">
+        <Header 
+          darkMode={darkMode}
+          setDarkMode={setDarkMode}
+          savedCount={savedPosts.length}
+          onOpenSaved={() => {}} // Could link to saved modal later
+          viewMode={viewMode}
+          setViewMode={(mode) => {
+            setViewMode(mode);
+            localStorage.setItem('news_view_mode', mode);
+            router.push('/');
+          }}
         />
+
+        <div className="flex-1 relative overflow-hidden">
+          {/* Floating Back Button (Mobile Helper) */}
+          <button 
+            onClick={() => router.push('/')}
+            className="fixed bottom-safe mb-20 right-6 z-50 p-4 bg-red-600 text-white rounded-full shadow-2xl active:scale-90 transition-transform lg:hidden"
+            aria-label="Back to home"
+          >
+            <ArrowLeft className="w-6 h-6" />
+          </button>
+
+          <InshortsFeed
+            posts={posts}
+            savedPosts={savedPosts}
+            onToggleBookmark={handleToggleBookmark}
+            onLoadMore={loadMore}
+            hasMore={hasMore}
+            loadingMore={loading}
+            sourceName={selectedSource?.kannadaName}
+            language={selectedSource?.language as 'kn' | 'en'}
+          />
+        </div>
       </div>
     </>
   );

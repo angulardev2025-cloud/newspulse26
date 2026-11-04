@@ -2,11 +2,9 @@ const Search = ({ searchQuery, setSearchQuery }: { searchQuery: string; setSearc
 
     // handle search query
     const handleSearch = (e: any) => {
-        e.preventDefault();
-        if (e.target.value.match(/[^a-zA-Z0-9 .,-]/) || e.target.value.match(/^ /)) {
-            return;
-        }
-        setSearchQuery(e.target.value);
+        const val = e.target.value;
+        if (val.startsWith(' ')) return;
+        setSearchQuery(val);
     };
 
     return (

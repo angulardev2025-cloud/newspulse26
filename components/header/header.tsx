@@ -25,9 +25,12 @@ export default function Header({
     <header className="w-full flex items-center justify-between gap-4 px-4 sm:px-8 md:px-12 py-4 border-b border-stone-200 dark:border-stone-800 bg-white/80 dark:bg-stone-900/80 backdrop-blur-md sticky top-0 z-40 transition-colors">
       {/* Zone 1: Brand Wordmark & Clock */}
       <div className="flex items-center gap-4">
-        <Link href="/" className="flex items-center gap-2 text-lg sm:text-xl font-serif font-bold tracking-tight text-stone-900 dark:text-stone-100 whitespace-nowrap shrink-0">
-          <Newspaper className="w-6 h-6 text-red-600" />
-          <span className="hidden sm:inline">NewsPulse</span>
+        <Link href="/" className="flex items-center gap-2 text-lg sm:text-xl font-serif font-bold tracking-tight text-stone-900 dark:text-stone-100 whitespace-nowrap shrink-0 group">
+          <Newspaper className="w-6 h-6 text-red-600 group-hover:rotate-12 transition-transform" />
+          <div className="flex items-baseline gap-1">
+            <span className="hidden sm:inline">NewsPulse</span>
+            <span className="text-[10px] font-sans font-black text-red-600 dark:text-red-500 bg-red-50 dark:bg-red-950/30 px-1.5 py-0.5 rounded uppercase tracking-tighter border border-red-100 dark:border-red-900/50">v1</span>
+          </div>
         </Link>
         <CompactClock />
       </div>

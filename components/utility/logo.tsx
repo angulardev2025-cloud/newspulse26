@@ -24,13 +24,13 @@ const LogoSVG = ({ name }: { name: string }) => {
 
   const hash = getHash(name);
   const color = colors[hash % colors.length];
-  const initials = name.substring(0, 2).toUpperCase();
+  const initials = (name || 'NP').substring(0, 2).toUpperCase();
 
   return (
     <div className="relative group">
       <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
         <rect width="48" height="48" rx="12" fill={color} fillOpacity="0.1" />
-        <rect x="4" y="4" width="40" height="40" rx="10" stroke={color} strokeWidth="2" strokeDasharray="2 4" className="group-hover:stroke-dashoffset-10 transition-all duration-1000" />
+        <rect x="4" y="4" width="40" height="40" rx="10" stroke={color} strokeWidth="2" strokeDasharray="2 4" style={{ transition: 'all 1s' }} className="group-hover:opacity-50" />
         <path 
           d="M12 12C12 10.8954 12.8954 10 14 10H34C35.1046 10 36 10.8954 36 12V36C36 37.1046 35.1046 38 34 38H14C12.8954 38 12 37.1046 12 36V12Z" 
           fill="white" 
