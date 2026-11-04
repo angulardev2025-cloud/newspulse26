@@ -35,15 +35,22 @@ export default function Header({
         <div className="flex items-center justify-between gap-3 px-4 sm:px-8 md:px-12 py-3">
           {/* Zone 1: Brand Wordmark, Clock & Desktop Breadcrumbs */}
           <div className="flex items-center gap-3 sm:gap-4 overflow-hidden">
-            <Link href="/" className="flex items-center gap-2 text-lg sm:text-xl font-serif font-bold tracking-tight text-stone-900 dark:text-stone-100 whitespace-nowrap shrink-0 group">
-              <Newspaper className="w-6 h-6 text-red-600 group-hover:rotate-12 transition-transform" />
-              <div className="flex items-baseline gap-1">
-                <span>NewsPulse</span>
-                <span className="text-[10px] font-sans font-black text-red-600 dark:text-red-500 bg-red-50 dark:bg-red-950/30 px-1.5 py-0.5 rounded uppercase tracking-tighter border border-red-100 dark:border-red-900/50">v1</span>
+            <Link href="/" className="shrink-0 group">
+              <div className="flex flex-col">
+                <div className="flex items-center gap-2 text-lg sm:text-xl font-serif font-bold tracking-tight text-stone-900 dark:text-stone-100">
+                  <Newspaper className="w-6 h-6 text-red-600 group-hover:rotate-12 transition-transform" />
+                  <div className="flex items-baseline gap-1">
+                    <span>NewsPulse</span>
+                    <span className="text-[10px] font-sans font-black text-red-600 dark:text-red-500 bg-red-50 dark:bg-red-950/30 px-1.5 py-0.5 rounded uppercase tracking-tighter border border-red-100 dark:border-red-900/50">v1</span>
+                  </div>
+                </div>
+                <div className="mt-1 flex sm:hidden">
+                   <CompactClock />
+                </div>
               </div>
             </Link>
 
-            <div className="hidden lg:block shrink-0">
+            <div className="hidden sm:block shrink-0 pl-2">
               <CompactClock />
             </div>
 

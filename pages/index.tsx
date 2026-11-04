@@ -9,7 +9,7 @@ import { OfflineIndicator } from '@/components/utility/pwaInstall';
 import { newsSources, NewsSource } from '@/components/data/newsSources';
 import { useNewsFeed } from '@/lib/hooks/useNewsFeed';
 import LogoSVG from '@/components/utility/logo';
-import { ArrowLeft, Globe, Newspaper } from 'lucide-react';
+import { ArrowLeft, Globe, Newspaper, Shuffle, ArrowRight } from 'lucide-react';
 import { useRouter } from 'next/router';
 import { NewsItem, WordPressPost } from '@/components/data/newsTypes';
 import ModernSourceGrid from '@/components/news/modernSourceGrid';
@@ -122,19 +122,38 @@ export default function Home() {
               <ModernSourceGrid sources={filteredSources} />
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-                {/* All Feeds Card */}
+                {/* Remix / All Feeds Card */}
                 {!query && (
                   <div 
                     onClick={() => router.push('/reader/all').catch(() => {})} 
-                    className="p-8 bg-red-600 text-white rounded-[2rem] cursor-pointer hover:scale-[1.02] active:scale-95 transition-all flex flex-col justify-between shadow-2xl shadow-red-600/20"
+                    className="group p-8 bg-red-600 text-white rounded-[2.5rem] cursor-pointer hover:scale-[1.02] active:scale-95 transition-all flex flex-col justify-between shadow-2xl shadow-red-600/30 border border-red-500 min-h-[320px]"
                   >
                     <div className="flex items-center justify-between">
-                      <LogoSVG name="ALL" logo="/assets/aistudio/images_8efc4be7.png" />
-                      <div className="px-3 py-1 bg-white/20 rounded-full text-[10px] font-bold uppercase tracking-widest backdrop-blur-md">Live Multi-Wire</div>
+                      <div className="p-4 bg-white/20 rounded-3xl backdrop-blur-md">
+                        <LogoSVG name="ALL" logo="/assets/aistudio/images_8efc4be7.png" />
+                      </div>
+                      <div className="flex flex-col items-end gap-2">
+                        <div className="px-3 py-1 bg-white/20 rounded-full text-[10px] font-black uppercase tracking-widest backdrop-blur-md border border-white/20">Remix Wire</div>
+                        <div className="flex items-center gap-1 text-white/60">
+                           <Shuffle className="w-3 h-3 text-white" />
+                           <span className="text-[10px] font-bold uppercase tracking-wider">Daily Ritual</span>
+                        </div>
+                      </div>
                     </div>
-                    <div className="mt-12">
-                      <h3 className="text-2xl font-bold font-serif">ಎಲ್ಲಾ ಸುದ್ದಿಗಳು</h3>
-                      <p className="text-white/70 text-sm mt-2">Combined live feed from all Coastal & Kannada publishers.</p>
+                    <div className="mt-8">
+                      <h3 className="text-2xl md:text-3xl font-bold font-serif leading-tight">Remix All News</h3>
+                      <p className="text-white/80 text-sm mt-3 leading-relaxed">Combined live feed from all 30+ Coastal & Kannada publisher APIs. Sorted by real-time publish date.</p>
+                      
+                      <div className="mt-6 flex items-center justify-between">
+                         <div className="flex flex-col">
+                            <span className="text-[9px] font-bold uppercase text-white/60 tracking-widest">Experience</span>
+                            <span className="text-xs font-bold text-white">Multi-Wire Remix</span>
+                         </div>
+                         <button className="px-6 py-2.5 bg-white text-red-600 rounded-2xl font-black text-xs uppercase tracking-wider shadow-lg flex items-center gap-2 group-hover:gap-3 transition-all">
+                            <span>Start Remix</span>
+                            <ArrowRight className="w-4 h-4" />
+                         </button>
+                      </div>
                     </div>
                   </div>
                 )}
@@ -143,15 +162,28 @@ export default function Home() {
                   <div 
                     key={source.id} 
                     onClick={() => handleSourceClick(source)} 
-                    className="group p-8 bg-white dark:bg-stone-900 rounded-[2rem] border border-stone-200 dark:border-stone-800 cursor-pointer hover:border-red-500 hover:shadow-2xl hover:shadow-red-500/5 transition-all duration-300 flex flex-col justify-between"
+                    className="group p-8 bg-white dark:bg-stone-900 rounded-[2.5rem] border border-stone-200 dark:border-stone-800 cursor-pointer hover:border-red-500 hover:shadow-2xl hover:shadow-red-500/5 transition-all duration-300 flex flex-col justify-between min-h-[320px]"
                   >
-                    <div className="flex items-center justify-between mb-12">
-                      <LogoSVG name={source.kannadaName} logo={source.logo} />
-                      <div className="px-2 py-1 bg-stone-100 dark:bg-stone-800 rounded-full text-[10px] font-bold uppercase tracking-widest text-stone-500">{source.category}</div>
+                    <div className="flex items-center justify-between mb-8">
+                      <div className="p-3.5 bg-stone-50 dark:bg-stone-800/60 rounded-2xl group-hover:scale-105 transition-transform duration-300">
+                        <LogoSVG name={source.kannadaName} logo={source.logo} />
+                      </div>
+                      <div className="px-2.5 py-1 bg-stone-100 dark:bg-stone-800 rounded-full text-[10px] font-black uppercase tracking-widest text-stone-500 dark:text-stone-400 border border-stone-200 dark:border-stone-700/50">{source.category}</div>
                     </div>
                     <div>
-                      <h3 className="font-bold text-xl group-hover:text-red-600 transition-colors font-serif">{source.kannadaName}</h3>
-                      <p className="text-sm text-stone-500 mt-2 font-medium">{source.name}</p>
+                      <h3 className="font-black text-xl md:text-2xl group-hover:text-red-600 transition-colors font-serif leading-tight">{source.kannadaName}</h3>
+                      <p className="text-sm text-stone-500 dark:text-stone-400 mt-2 font-medium line-clamp-2">{source.name}</p>
+                      
+                      <div className="mt-8 flex items-center justify-between border-t border-stone-100 dark:border-stone-800/60 pt-5">
+                         <div className="flex flex-col">
+                            <span className="text-[9px] font-bold uppercase text-stone-400 tracking-widest">Experience</span>
+                            <span className="text-xs font-bold text-stone-900 dark:text-stone-200">Inshorts Reader</span>
+                         </div>
+                         <button className="px-5 py-2.5 bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 rounded-2xl font-black text-xs uppercase tracking-wider shadow-lg flex items-center gap-2 group-hover:bg-red-600 group-hover:text-white transition-all">
+                            <span>Read Now</span>
+                            <ArrowRight className="w-4 h-4" />
+                         </button>
+                      </div>
                     </div>
                   </div>
                 ))}
