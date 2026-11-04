@@ -23,7 +23,7 @@ const SourceCard = ({ source, onClick, index }: { source: NewsSource, onClick: (
     >
       <div className="flex items-start justify-between">
         <div className="p-4 bg-stone-50 dark:bg-stone-800/50 rounded-3xl group-hover:scale-110 transition-transform duration-500">
-          <LogoSVG name={source.kannadaName} />
+          <LogoSVG name={source.kannadaName} logo={source.logo} />
         </div>
         <div className="flex flex-col items-end">
           <span className="px-4 py-1.5 bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400 rounded-full text-[10px] font-black uppercase tracking-widest border border-red-100 dark:border-red-900/50">

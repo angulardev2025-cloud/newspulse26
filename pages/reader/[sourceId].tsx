@@ -4,20 +4,19 @@ import Head from 'next/head';
 import InshortsFeed from '@/components/news/inshortsFeed';
 import { newsSources, NewsSource } from '@/components/data/newsSources';
 import { useNewsFeed } from '@/lib/hooks/useNewsFeed';
-import { ArrowLeft, Share2 } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { WordPressPost } from '@/components/data/newsTypes';
-
 import GoogleLoader from '@/components/utility/loader';
-
 import Header from '@/components/header/header';
 
 export default function ReaderPage() {
   const router = useRouter();
   const { sourceId } = router.query;
   const { posts, loading, hasMore, fetchMore } = useNewsFeed();
+  
+  const [mounted, setMounted] = useState(false);
   const [selectedSource, setSelectedSource] = useState<NewsSource | null>(null);
   const [savedPosts, setSavedPosts] = useState<WordPressPost[]>([]);
-  const [mounted, setMounted] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
   const [viewMode, setViewMode] = useState<'classic' | 'modern'>('classic');
 
@@ -47,17 +46,17 @@ export default function ReaderPage() {
   }, [darkMode, mounted]);
 
   useEffect(() => {
-    if (sourceId) {
+    if (mounted && sourceId) {
       const source = newsSources.find(s => s.id === sourceId);
       if (source) {
         setSelectedSource(source);
         fetchMore(source.id, '', 1, false);
       } else if (sourceId === 'all') {
-        setSelectedSource(newsSources[0]); // All feeds
+        setSelectedSource(newsSources[0]);
         fetchMore('all', '', 1, false);
       }
     }
-  }, [sourceId, fetchMore]);
+  }, [sourceId, fetchMore, mounted]);
 
   const handleToggleBookmark = (post: WordPressPost) => {
     setSavedPosts((prev) => {
@@ -75,11 +74,29 @@ export default function ReaderPage() {
     }
   };
 
-  if (!mounted || !selectedSource) {
+  const handleViewChange = (mode: 'classic' | 'modern') => {
+    setViewMode(mode);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('news_view_mode', mode);
+      router.push('/');
+    }
+  };
+
+  // SSR Fallback
+  if (!mounted) {
     return (
-      <div className="h-screen w-full flex items-center justify-center bg-stone-50 dark:bg-stone-950">
+      <div className="h-screen w-full bg-stone-50 dark:bg-stone-950 flex items-center justify-center">
         <GoogleLoader size="md" />
       </div>
+    );
+  }
+
+  if (!selectedSource && !loading) {
+    return (
+       <div className="h-screen w-full bg-stone-50 dark:bg-stone-950 flex flex-col items-center justify-center gap-4">
+         <p className="text-stone-500">Source not found or loading...</p>
+         <button onClick={() => router.push('/')} className="px-6 py-2 bg-red-600 text-white rounded-full font-bold">Back to Home</button>
+       </div>
     );
   }
 
@@ -95,17 +112,12 @@ export default function ReaderPage() {
           darkMode={darkMode}
           setDarkMode={setDarkMode}
           savedCount={savedPosts.length}
-          onOpenSaved={() => {}} // Could link to saved modal later
+          onOpenSaved={() => {}} 
           viewMode={viewMode}
-          setViewMode={(mode) => {
-            setViewMode(mode);
-            localStorage.setItem('news_view_mode', mode);
-            router.push('/');
-          }}
+          setViewMode={handleViewChange}
         />
 
         <div className="flex-1 relative overflow-hidden">
-          {/* Floating Back Button (Mobile Helper) */}
           <button 
             onClick={() => router.push('/')}
             className="fixed bottom-safe mb-20 right-6 z-50 p-4 bg-red-600 text-white rounded-full shadow-2xl active:scale-90 transition-transform lg:hidden"

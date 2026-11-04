@@ -7,6 +7,7 @@ export interface NewsSource {
   category: string;
   language: 'kn' | 'en';
   type: 'wordpress' | 'rest';
+  logo?: string;
 }
 
 export const newsSources: NewsSource[] = [
@@ -18,7 +19,8 @@ export const newsSources: NewsSource[] = [
     description: 'Combined live wire across all Coastal and Kannada API endpoints.',
     category: 'General',
     language: 'kn',
-    type: 'wordpress'
+    type: 'wordpress',
+    logo: '/assets/aistudio/images_8efc4be7.png'
   },
   {
     id: 'tv9',
@@ -28,7 +30,8 @@ export const newsSources: NewsSource[] = [
     description: '24/7 Kannada news channel.',
     category: 'News',
     language: 'kn',
-    type: 'wordpress'
+    type: 'wordpress',
+    logo: '/assets/aistudio/images__1__7605c7ae.png'
   },
   {
     id: 'public-tv',
@@ -38,7 +41,8 @@ export const newsSources: NewsSource[] = [
     description: 'Popular Kannada news broadcaster.',
     category: 'News',
     language: 'kn',
-    type: 'wordpress'
+    type: 'wordpress',
+    logo: '/assets/aistudio/images__2__608cc933.png'
   },
   {
     id: 'vijayavani',
@@ -48,7 +52,8 @@ export const newsSources: NewsSource[] = [
     description: 'Widely circulated Kannada daily.',
     category: 'Newspaper',
     language: 'kn',
-    type: 'wordpress'
+    type: 'wordpress',
+    logo: '/assets/aistudio/images__4__4cb37b0e.jpeg'
   },
   {
     id: 'prajavani',
@@ -58,7 +63,8 @@ export const newsSources: NewsSource[] = [
     description: 'Kannada daily.',
     category: 'Newspaper',
     language: 'kn',
-    type: 'wordpress'
+    type: 'wordpress',
+    logo: '/assets/aistudio/images__2__07cf62ef.jpeg'
   },
   {
     id: 'udupi-express',
@@ -68,7 +74,8 @@ export const newsSources: NewsSource[] = [
     description: 'Coastal Karnataka news.',
     category: 'Coastal',
     language: 'kn',
-    type: 'wordpress'
+    type: 'wordpress',
+    logo: '/assets/aistudio/images__3__f45460f1.jpeg'
   },
   {
     id: 'udupi-times',
@@ -78,7 +85,8 @@ export const newsSources: NewsSource[] = [
     description: 'Udupi regional news.',
     category: 'Coastal',
     language: 'kn',
-    type: 'wordpress'
+    type: 'wordpress',
+    logo: '/assets/aistudio/images__5__8a832d02.jpeg'
   },
   {
     id: 'mangalorean',
@@ -128,6 +136,8 @@ export const newsSources: NewsSource[] = [
     description: 'Digital analysis.',
     category: 'Digital',
     language: 'kn',
-    type: 'wordpress'
+    type: 'wordpress',
+    logo: '/assets/aistudio/images__1__919b0bc9.jpeg'
   }
 ];
+

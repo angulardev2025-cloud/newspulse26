@@ -115,7 +115,7 @@ export default function Home() {
                 className="p-8 bg-red-600 text-white rounded-[2rem] cursor-pointer hover:scale-[1.02] active:scale-95 transition-all flex flex-col justify-between shadow-2xl shadow-red-600/20"
               >
                 <div className="flex items-center justify-between">
-                  <LogoSVG name="ALL" />
+                  <LogoSVG name="ALL" logo="/assets/aistudio/images_8efc4be7.png" />
                   <div className="px-3 py-1 bg-white/20 rounded-full text-[10px] font-bold uppercase tracking-widest backdrop-blur-md">Live Multi-Wire</div>
                 </div>
                 <div className="mt-12">
@@ -131,7 +131,7 @@ export default function Home() {
                   className="group p-8 bg-white dark:bg-stone-900 rounded-[2rem] border border-stone-200 dark:border-stone-800 cursor-pointer hover:border-red-500 hover:shadow-2xl hover:shadow-red-500/5 transition-all duration-500 flex flex-col justify-between"
                 >
                   <div className="flex items-center justify-between mb-12">
-                    <LogoSVG name={source.kannadaName} />
+                    <LogoSVG name={source.kannadaName} logo={source.logo} />
                     <div className="px-2 py-1 bg-stone-100 dark:bg-stone-800 rounded-full text-[10px] font-bold uppercase tracking-widest text-stone-500">{source.category}</div>
                   </div>
                   <div>

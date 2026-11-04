@@ -1,6 +1,20 @@
 import React from 'react';
+import Image from 'next/image';
 
-const LogoSVG = ({ name }: { name: string }) => {
+const LogoSVG = ({ name, logo }: { name: string, logo?: string }) => {
+  if (logo) {
+    return (
+      <div className="relative w-12 h-12 rounded-xl overflow-hidden shadow-sm border border-stone-100 dark:border-stone-800">
+        <Image 
+          src={logo} 
+          alt={name} 
+          fill 
+          className="object-cover" 
+          referrerPolicy="no-referrer" 
+        />
+      </div>
+    );
+  }
   // Generate a distinct color based on name
   const colors = [
     '#EF4444', // Red
