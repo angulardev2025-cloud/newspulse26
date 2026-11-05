@@ -1,10 +1,11 @@
 'use client';
 
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { Bookmark, Share2, ExternalLink, Clock, Check, ChevronUp, ChevronDown, AlertCircle, Home, Globe } from 'lucide-react';
+import { Bookmark, Share2, ExternalLink, Clock, Check, ChevronUp, ChevronDown, AlertCircle, Home, Globe, BookOpen } from 'lucide-react';
 import { dateFormat } from '../utility/dateFormat';
 import { WordPressPost } from '@/components/data/newsTypes';
 import { newsSources, extractDomainBadge } from '@/components/data/newsSources';
+import { calculateReadingTime } from '@/lib/utility/readingTime';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import GoogleLoader from '../utility/loader';
@@ -83,6 +84,7 @@ const ArticleCard = React.forwardRef<HTMLDivElement, ArticleCardProps>(({
   const content = stripHtml(post.content?.rendered || '');
   
   const fullText = (excerpt + ' ' + content).split(/\s+/).slice(0, 80).join(' ');
+  const readingEstimate = calculateReadingTime(content, excerpt, title);
   
   // Calculate dynamic batch count based on active sources
   const activeSourcesCount = newsSources.filter(s => s.id !== 'all' && s.endpoint).length;
@@ -187,6 +189,20 @@ const ArticleCard = React.forwardRef<HTMLDivElement, ArticleCardProps>(({
             </motion.span>
           </div>
         )}
+
+        {/* Reading Time Badge on Image */}
+        <div className="absolute bottom-3 right-4 z-10">
+          <motion.span 
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.15 }}
+            className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-black/80 backdrop-blur-md text-white text-[10px] font-mono font-bold rounded-lg border border-white/20 uppercase tracking-wider shadow-md"
+            title={`Estimated reading time: ${readingEstimate.text} (~${readingEstimate.words} words)`}
+          >
+            <BookOpen className="w-3 h-3 text-amber-400 shrink-0" />
+            <span>{readingEstimate.text}</span>
+          </motion.span>
+        </div>
       </div>
 
       {/* Content Section */}
@@ -195,10 +211,18 @@ const ArticleCard = React.forwardRef<HTMLDivElement, ArticleCardProps>(({
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.15 }}
-          className="flex items-center gap-2 text-[10px] text-stone-500 dark:text-stone-400 mb-2 uppercase tracking-wide font-mono"
+          className="flex items-center gap-2 text-[10px] text-stone-500 dark:text-stone-400 mb-2 uppercase tracking-wide font-mono flex-wrap"
         >
-          <Clock className="w-3 h-3 text-red-500" />
-          <span>{dateFormat(post.date)}</span>
+          <div className="flex items-center gap-1.5">
+            <Clock className="w-3 h-3 text-red-500" />
+            <span>{dateFormat(post.date)}</span>
+          </div>
+          <span className="text-stone-300 dark:text-stone-700">·</span>
+          <span className="inline-flex items-center gap-1 text-stone-700 dark:text-stone-300 bg-stone-100 dark:bg-stone-800/80 px-2 py-0.5 rounded-md text-[10px] font-semibold border border-stone-200/60 dark:border-stone-700/60">
+            <BookOpen className="w-3 h-3 text-amber-500" />
+            <span>{readingEstimate.text}</span>
+            <span className="text-stone-400 dark:text-stone-500 font-normal">({readingEstimate.words} words)</span>
+          </span>
         </motion.div>
         
         <motion.h2 

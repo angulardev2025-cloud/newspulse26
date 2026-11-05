@@ -9,6 +9,7 @@ import { WordPressPost } from '@/components/data/newsTypes';
 import GoogleLoader from '@/components/utility/loader';
 import DailyRitualLoader from '@/components/utility/dailyRitualLoader';
 import Header from '@/components/header/header';
+import { useTheme } from '@/lib/context/ThemeContext';
 
 const allSource: NewsSource = {
   id: 'all',
@@ -22,15 +23,15 @@ const allSource: NewsSource = {
   logo: '/assets/aistudio/images_8efc4be7.png'
 };
 
-export default function ReaderPage() {
+export default function ReaderPage({ initialSourceId }: { initialSourceId?: string }) {
   const router = useRouter();
-  const { sourceId } = router.query;
+  const sourceId = router.query.sourceId || initialSourceId;
   const { posts, loading, hasMore, fetchMore } = useNewsFeed();
+  const { darkMode, setDarkMode } = useTheme();
   
   const [mounted, setMounted] = useState(false);
   const [selectedSource, setSelectedSource] = useState<NewsSource | null>(null);
   const [savedPosts, setSavedPosts] = useState<WordPressPost[]>([]);
-  const [darkMode, setDarkMode] = useState(false);
   const [viewMode, setViewMode] = useState<'classic' | 'modern'>('classic');
 
   useEffect(() => {
@@ -50,13 +51,6 @@ export default function ReaderPage() {
       if (storedView) setViewMode(storedView);
     } catch (e) {}
   }, []);
-
-  useEffect(() => {
-    if (mounted) {
-      if (darkMode) document.documentElement.classList.add('dark');
-      else document.documentElement.classList.remove('dark');
-    }
-  }, [darkMode, mounted]);
 
   useEffect(() => {
     if (mounted && router.isReady && sourceId) {
@@ -176,3 +170,13 @@ export default function ReaderPage() {
     </>
   );
 }
+
+export async function getServerSideProps(context: any) {
+  const { sourceId } = context.params || {};
+  return {
+    props: {
+      initialSourceId: sourceId || 'all',
+    },
+  };
+}
+

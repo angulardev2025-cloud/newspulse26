@@ -25,6 +25,9 @@ export async function fetchWordPress(endpoint: string, page: number) {
     origin = new URL(endpoint).origin + '/';
   } catch (e) {}
 
+  let data: any = null;
+
+  // 1. Try direct axios request
   try {
     const res = await axios.get(url, {
       httpsAgent,
@@ -44,62 +47,76 @@ export async function fetchWordPress(endpoint: string, page: number) {
         'Referer': origin,
         'Cache-Control': 'max-age=0',
       },
-      timeout: 6000, // 6s fast timeout
+      timeout: 5000,
     });
+    data = res.data;
+  } catch (error: any) {
+    // 2. Fallback to CORS/SSL proxy for ALL endpoints if direct fetch fails
+    try {
+      const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
+      const proxyRes = await axios.get(proxyUrl, { timeout: 7000 });
+      data = proxyRes.data;
+    } catch (proxyErr) {
+      return [];
+    }
+  }
 
-    const data = res.data;
-    let rawItems: any[] = [];
+  if (!data) return [];
+
+  // If proxy returned string JSON, parse it
+  if (typeof data === 'string') {
+    try {
+      data = JSON.parse(data);
+    } catch (e) {}
+  }
+
+  let rawItems: any[] = [];
+  if (Array.isArray(data)) {
+    rawItems = data;
+  } else if (data && typeof data === 'object') {
+    if (Array.isArray(data.data)) rawItems = data.data;
+    else if (Array.isArray(data.posts)) rawItems = data.posts;
+    else if (Array.isArray(data.items)) rawItems = data.items;
+    else if (Array.isArray(data.articles)) rawItems = data.articles;
+    else if (Array.isArray(data.result)) rawItems = data.result;
+    else if (Array.isArray(data.value)) rawItems = data.value;
+  }
+
+  const stripHtml = (html: any) => {
+    if (!html || typeof html !== 'string') return '';
+    return html.replace(/<\/?[^>]+(>|$)/g, '')
+      .replace(/&nbsp;/g, ' ')
+      .replace(/&amp;/g, '&')
+      .replace(/&quot;/g, '"')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .trim();
+  };
+
+  return rawItems.map((item: any) => {
+    if (!item || typeof item !== 'object') return null;
+
+    const rawTitle = item.title?.rendered || item.title || item.headline || item.name || 'News';
+    const rawExcerpt = item.excerpt?.rendered || item.description || item.summary || '';
+    const rawContent = item.content?.rendered || item.content || '';
     
-    if (Array.isArray(data)) {
-      rawItems = data;
-    } else if (data && typeof data === 'object') {
-      if (Array.isArray(data.data)) rawItems = data.data;
-      else if (Array.isArray(data.posts)) rawItems = data.posts;
-      else if (Array.isArray(data.items)) rawItems = data.items;
-      else if (Array.isArray(data.articles)) rawItems = data.articles;
-      else if (Array.isArray(data.result)) rawItems = data.result;
-      else if (Array.isArray(data.value)) rawItems = data.value;
+    let excerpt = stripHtml(rawExcerpt);
+    if (!excerpt || excerpt.length < 30) {
+      excerpt = stripHtml(rawContent).substring(0, 300);
     }
 
-    const stripHtml = (html: any) => {
-      if (!html || typeof html !== 'string') return '';
-      return html.replace(/<\/?[^>]+(>|$)/g, '')
-        .replace(/&nbsp;/g, ' ')
-        .replace(/&amp;/g, '&')
-        .replace(/&quot;/g, '"')
-        .replace(/&lt;/g, '<')
-        .replace(/&gt;/g, '>')
-        .trim();
+    const mediaUrl = item._embedded?.['wp:featuredmedia']?.[0]?.source_url || item.image || item.urlToImage || item.featured_image || item.thumbnail || '';
+
+    return {
+      id: item.id || item._id || Math.random(),
+      date: item.date || item.publishedAt || item.created_at || new Date().toISOString(),
+      link: item.link || item.url || '#',
+      title: { rendered: stripHtml(rawTitle) },
+      excerpt: { rendered: excerpt },
+      content: { rendered: typeof rawContent === 'string' ? rawContent : excerpt },
+      _embedded: mediaUrl ? {
+        'wp:featuredmedia': [{ source_url: mediaUrl }]
+      } : item._embedded,
     };
-
-    return rawItems.map((item: any) => {
-      if (!item || typeof item !== 'object') return null;
-
-      const rawTitle = item.title?.rendered || item.title || item.headline || item.name || 'News';
-      const rawExcerpt = item.excerpt?.rendered || item.description || item.summary || '';
-      const rawContent = item.content?.rendered || item.content || '';
-      
-      let excerpt = stripHtml(rawExcerpt);
-      if (!excerpt || excerpt.length < 30) {
-        excerpt = stripHtml(rawContent).substring(0, 300);
-      }
-
-      const mediaUrl = item._embedded?.['wp:featuredmedia']?.[0]?.source_url || item.image || item.featured_image || item.thumbnail || '';
-
-      return {
-        id: item.id || item._id || Math.random(),
-        date: item.date || item.publishedAt || item.created_at || new Date().toISOString(),
-        link: item.link || item.url || '#',
-        title: { rendered: stripHtml(rawTitle) },
-        excerpt: { rendered: excerpt },
-        content: { rendered: typeof rawContent === 'string' ? rawContent : excerpt },
-        _embedded: mediaUrl ? {
-          'wp:featuredmedia': [{ source_url: mediaUrl }]
-        } : item._embedded,
-      };
-    }).filter(Boolean);
-  } catch (error: any) {
-    // Silently handle restricted / offline endpoints so wire remix continues smoothly
-    return [];
-  }
+  }).filter(Boolean);
 }

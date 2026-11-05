@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { NewsItem } from '../data/newsTypes';
 import { dateFormat } from '../utility/dateFormat';
-import { X, ExternalLink, Bookmark, Sparkles, Share2, Check } from 'lucide-react';
+import { X, ExternalLink, Bookmark, Sparkles, Share2, Check, BookOpen } from 'lucide-react';
+import { calculateReadingTime } from '@/lib/utility/readingTime';
 
 import Image from 'next/image';
 
@@ -23,6 +24,8 @@ export default function ArticleModal({
   const [copied, setCopied] = useState(false);
 
   if (!article) return null;
+
+  const readingEstimate = calculateReadingTime(article.content, article.description, article.name);
 
   const handleGenerateAiSummary = async () => {
     setLoadingAi(true);
@@ -47,10 +50,15 @@ export default function ArticleModal({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between pb-4 border-b border-stone-200 dark:border-stone-800">
-          <div className="flex items-center gap-2 text-xs text-stone-500 font-sans tracking-wide">
-            <span>{article.provider[0]?.name || "News"}</span>
+          <div className="flex items-center gap-2 text-xs text-stone-500 dark:text-stone-400 font-sans tracking-wide flex-wrap">
+            <span className="font-medium text-stone-800 dark:text-stone-200">{article.provider[0]?.name || "News"}</span>
             <span aria-hidden="true">·</span>
             <span>{dateFormat(article.datePublished)}</span>
+            <span aria-hidden="true">·</span>
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 font-mono text-[11px] font-semibold border border-stone-200 dark:border-stone-700">
+              <BookOpen className="w-3 h-3 text-amber-500" />
+              <span>{readingEstimate.text}</span>
+            </span>
           </div>
           <div className="flex items-center gap-2">
             <button onClick={() => onToggleBookmark(article)} className={`p-2 rounded-lg ${isBookmarked ? 'text-amber-600 bg-amber-50' : 'text-stone-500'}`}>

@@ -14,16 +14,18 @@ import { useRouter } from 'next/router';
 import { NewsItem, WordPressPost } from '@/components/data/newsTypes';
 import ModernSourceGrid from '@/components/news/modernSourceGrid';
 
+import { useTheme } from '@/lib/context/ThemeContext';
+
 export default function Home() {
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
+  const { darkMode, setDarkMode } = useTheme();
   const { posts, loading, hasMore, fetchMore } = useNewsFeed();
   const [searchQuery, setSearchQuery] = useState("");
   const debouncedQuery = useDebounce(searchQuery, 400);
   const [selectedArticle, setSelectedArticle] = useState<NewsItem | null>(null);
   const [savedPosts, setSavedPosts] = useState<WordPressPost[]>([]);
   const [showSavedModal, setShowSavedModal] = useState(false);
-  const [darkMode, setDarkMode] = useState(false);
   const [viewMode, setViewMode] = useState<'classic' | 'modern'>('classic');
 
   useEffect(() => {
@@ -52,13 +54,6 @@ export default function Home() {
     }
   }, [viewMode, mounted]);
 
-  useEffect(() => {
-    if (mounted) {
-      if (darkMode) document.documentElement.classList.add('dark');
-      else document.documentElement.classList.remove('dark');
-    }
-  }, [darkMode, mounted]);
-
   const handleToggleBookmark = (post: WordPressPost) => {
     setSavedPosts((prev) => {
       const exists = prev.some((s) => s.id === post.id);
@@ -72,7 +67,7 @@ export default function Home() {
     router.push(`/reader/${source.id}`).catch(() => {});
   };
 
-  if (!mounted) return null;
+  // Render page with defaults during SSR, hydrate client state in useEffect
 
   return (
     <>

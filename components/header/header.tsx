@@ -1,15 +1,16 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { Newspaper, Bookmark, Sun, Moon, LayoutGrid, LayoutList, Menu, X, Globe, Sparkles } from 'lucide-react';
+import { Newspaper, Bookmark, Sun, Moon, LayoutGrid, LayoutList, Menu, X, Globe, Sparkles, Monitor } from 'lucide-react';
 import { PWAInstallButton } from '../utility/pwaInstall';
 import CompactClock from '../utility/clock';
 import Breadcrumbs, { BreadcrumbItem } from '../utility/breadcrumbs';
 import { newsSources } from '../data/newsSources';
 import { useRouter } from 'next/router';
+import { useTheme } from '@/lib/context/ThemeContext';
 
 interface HeaderProps {
-  darkMode: boolean;
-  setDarkMode: (val: boolean) => void;
+  darkMode?: boolean;
+  setDarkMode?: (val: boolean) => void;
   savedCount: number;
   onOpenSaved: () => void;
   viewMode: 'classic' | 'modern';
@@ -18,8 +19,6 @@ interface HeaderProps {
 }
 
 export default function Header({
-  darkMode,
-  setDarkMode,
   savedCount,
   onOpenSaved,
   viewMode,
@@ -28,6 +27,7 @@ export default function Header({
 }: HeaderProps) {
   const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { darkMode, toggleTheme, theme, setTheme } = useTheme();
 
   return (
     <>
@@ -108,12 +108,14 @@ export default function Header({
               )}
             </button>
 
+            {/* Theme Toggle Button - visible on desktop and mobile */}
             <button
-              onClick={() => setDarkMode(!darkMode)}
-              className="hidden sm:flex p-2 text-stone-700 dark:text-stone-300 bg-stone-100 dark:bg-stone-800 rounded-lg hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors min-h-[38px] min-w-[38px] items-center justify-center"
-              title="Toggle Theme"
+              onClick={toggleTheme}
+              className="p-2 text-stone-700 dark:text-stone-300 bg-stone-100 dark:bg-stone-800 rounded-lg hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors min-h-[38px] min-w-[38px] flex items-center justify-center border border-stone-200/80 dark:border-stone-700/80"
+              title={darkMode ? "Switch to light mode" : "Switch to dark mode"}
+              aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
             >
-              {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+              {darkMode ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-indigo-500" />}
             </button>
 
             {/* Mobile Hamburger Button */}
@@ -153,6 +155,46 @@ export default function Header({
               </button>
             </div>
 
+            {/* Theme Mode Section */}
+            <div className="p-4 border-b border-stone-100 dark:border-stone-800">
+              <div className="text-xs font-bold uppercase tracking-wider text-stone-400 mb-2">Theme Mode</div>
+              <div className="grid grid-cols-3 gap-2">
+                <button
+                  onClick={() => setTheme('light')}
+                  className={`flex items-center justify-center gap-1.5 p-2.5 rounded-xl text-xs font-bold transition-all ${
+                    theme === 'light' 
+                      ? 'bg-amber-500 text-white shadow-md' 
+                      : 'bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300'
+                  }`}
+                >
+                  <Sun className="w-3.5 h-3.5" />
+                  <span>Light</span>
+                </button>
+                <button
+                  onClick={() => setTheme('dark')}
+                  className={`flex items-center justify-center gap-1.5 p-2.5 rounded-xl text-xs font-bold transition-all ${
+                    theme === 'dark' 
+                      ? 'bg-indigo-600 text-white shadow-md' 
+                      : 'bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300'
+                  }`}
+                >
+                  <Moon className="w-3.5 h-3.5" />
+                  <span>Dark</span>
+                </button>
+                <button
+                  onClick={() => setTheme('system')}
+                  className={`flex items-center justify-center gap-1.5 p-2.5 rounded-xl text-xs font-bold transition-all ${
+                    theme === 'system' 
+                      ? 'bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 shadow-md' 
+                      : 'bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300'
+                  }`}
+                >
+                  <Monitor className="w-3.5 h-3.5" />
+                  <span>System</span>
+                </button>
+              </div>
+            </div>
+
             {/* View Mode Section */}
             <div className="p-4 border-b border-stone-100 dark:border-stone-800">
               <div className="text-xs font-bold uppercase tracking-wider text-stone-400 mb-2">Display Layout</div>
@@ -184,16 +226,7 @@ export default function Header({
 
             {/* Quick Actions */}
             <div className="p-4 border-b border-stone-100 dark:border-stone-800 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => { setDarkMode(!darkMode); }}
-                  className="flex items-center gap-2 px-4 py-2.5 bg-stone-100 dark:bg-stone-800 text-stone-800 dark:text-stone-200 rounded-xl text-xs font-bold"
-                >
-                  {darkMode ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-indigo-500" />}
-                  <span>{darkMode ? 'Light Theme' : 'Dark Theme'}</span>
-                </button>
-              </div>
-
+              <span className="text-xs font-medium text-stone-500">App Utilities</span>
               <PWAInstallButton />
             </div>
 
