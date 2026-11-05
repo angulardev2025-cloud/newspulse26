@@ -10,6 +10,7 @@ import GoogleLoader from '@/components/utility/loader';
 import DailyRitualLoader from '@/components/utility/dailyRitualLoader';
 import Header from '@/components/header/header';
 import { useTheme } from '@/lib/context/ThemeContext';
+import { useBookmarks } from '@/lib/context/BookmarkContext';
 
 const allSource: NewsSource = {
   id: 'all',
@@ -28,24 +29,14 @@ export default function ReaderPage({ initialSourceId }: { initialSourceId?: stri
   const sourceId = router.query.sourceId || initialSourceId;
   const { posts, loading, hasMore, fetchMore } = useNewsFeed();
   const { darkMode, setDarkMode } = useTheme();
+  const { savedPosts, savedCount, toggleBookmark, setSavedModalOpen } = useBookmarks();
   
   const [mounted, setMounted] = useState(false);
   const [selectedSource, setSelectedSource] = useState<NewsSource | null>(null);
-  const [savedPosts, setSavedPosts] = useState<WordPressPost[]>([]);
   const [viewMode, setViewMode] = useState<'classic' | 'modern'>('classic');
 
   useEffect(() => {
     setMounted(true);
-    try {
-      const stored = localStorage.getItem('tv9_saved_posts');
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed)) setSavedPosts(parsed);
-      }
-    } catch (e) {
-      console.error('Failed to load saved posts:', e);
-    }
-    
     try {
       const storedView = localStorage.getItem('news_view_mode') as 'classic' | 'modern';
       if (storedView) setViewMode(storedView);
@@ -73,12 +64,7 @@ export default function ReaderPage({ initialSourceId }: { initialSourceId?: stri
   }, [sourceId, router.isReady, fetchMore, mounted]);
 
   const handleToggleBookmark = (post: WordPressPost) => {
-    setSavedPosts((prev) => {
-      const exists = prev.some((s) => s.id === post.id);
-      const updated = exists ? prev.filter((s) => s.id !== post.id) : [...prev, post];
-      localStorage.setItem('tv9_saved_posts', JSON.stringify(updated));
-      return updated;
-    });
+    toggleBookmark(post);
   };
 
   const loadMore = () => {
@@ -139,8 +125,8 @@ export default function ReaderPage({ initialSourceId }: { initialSourceId?: stri
         <Header 
           darkMode={darkMode}
           setDarkMode={setDarkMode}
-          savedCount={savedPosts.length}
-          onOpenSaved={() => {}} 
+          savedCount={savedCount}
+          onOpenSaved={() => setSavedModalOpen(true)} 
           viewMode={viewMode}
           setViewMode={handleViewChange}
           breadcrumbs={breadcrumbs}

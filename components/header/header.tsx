@@ -7,15 +7,18 @@ import Breadcrumbs, { BreadcrumbItem } from '../utility/breadcrumbs';
 import { newsSources } from '../data/newsSources';
 import { useRouter } from 'next/router';
 import { useTheme } from '@/lib/context/ThemeContext';
+import { useBookmarks } from '@/lib/context/BookmarkContext';
+import ReadingProgressBar from '../utility/readingProgressBar';
 
 interface HeaderProps {
   darkMode?: boolean;
   setDarkMode?: (val: boolean) => void;
-  savedCount: number;
-  onOpenSaved: () => void;
+  savedCount?: number;
+  onOpenSaved?: () => void;
   viewMode: 'classic' | 'modern';
   setViewMode: (mode: 'classic' | 'modern') => void;
   breadcrumbs?: BreadcrumbItem[];
+  readingProgress?: number;
 }
 
 export default function Header({
@@ -24,13 +27,19 @@ export default function Header({
   viewMode,
   setViewMode,
   breadcrumbs,
+  readingProgress,
 }: HeaderProps) {
   const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { darkMode, toggleTheme, theme, setTheme } = useTheme();
+  const { savedCount: contextSavedCount, setSavedModalOpen } = useBookmarks();
+
+  const actualSavedCount = savedCount !== undefined ? savedCount : contextSavedCount;
+  const handleOpenSaved = onOpenSaved || (() => setSavedModalOpen(true));
 
   return (
     <>
+      <ReadingProgressBar progress={readingProgress} />
       <header className="w-full border-b border-stone-200 dark:border-stone-800 bg-white/90 dark:bg-stone-900/90 backdrop-blur-md sticky top-0 z-40 transition-colors">
         <div className="flex items-center justify-between gap-3 px-4 sm:px-8 md:px-12 py-3">
           {/* Zone 1: Brand Wordmark, Clock & Desktop Breadcrumbs */}
@@ -95,15 +104,16 @@ export default function Header({
             </div>
 
             <button
-              onClick={onOpenSaved}
-              className="relative flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-stone-700 dark:text-stone-300 bg-stone-100 dark:bg-stone-800 rounded-lg hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors whitespace-nowrap min-h-[38px]"
-              title="Saved Articles"
+              onClick={handleOpenSaved}
+              className="relative flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-stone-700 dark:text-stone-300 bg-stone-100 dark:bg-stone-800 rounded-lg hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors whitespace-nowrap min-h-[38px] border border-stone-200/60 dark:border-stone-700/60"
+              title="Saved Articles (Offline Reading)"
+              aria-label={`Saved Articles (${actualSavedCount})`}
             >
-              <Bookmark className="w-4 h-4" />
+              <Bookmark className={`w-4 h-4 ${actualSavedCount > 0 ? 'text-red-600 fill-current' : ''}`} />
               <span className="hidden sm:inline">Saved</span>
-              {savedCount > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 px-1.5 py-0.5 text-[10px] font-bold text-white bg-red-600 rounded-full">
-                  {savedCount}
+              {actualSavedCount > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 px-1.5 py-0.5 text-[10px] font-bold text-white bg-red-600 rounded-full animate-in zoom-in-50">
+                  {actualSavedCount}
                 </span>
               )}
             </button>
@@ -226,7 +236,21 @@ export default function Header({
 
             {/* Quick Actions */}
             <div className="p-4 border-b border-stone-100 dark:border-stone-800 flex items-center justify-between">
-              <span className="text-xs font-medium text-stone-500">App Utilities</span>
+              <button
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  handleOpenSaved();
+                }}
+                className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-stone-100 dark:bg-stone-800 text-stone-800 dark:text-stone-200 text-xs font-bold hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors"
+              >
+                <Bookmark className={`w-4 h-4 ${actualSavedCount > 0 ? 'text-red-600 fill-current' : ''}`} />
+                <span>Saved Collection</span>
+                {actualSavedCount > 0 && (
+                  <span className="px-1.5 py-0.2 text-[10px] bg-red-600 text-white rounded-full font-mono font-bold">
+                    {actualSavedCount}
+                  </span>
+                )}
+              </button>
               <PWAInstallButton />
             </div>
 

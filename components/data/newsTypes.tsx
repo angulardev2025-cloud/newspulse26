@@ -33,4 +33,7 @@ export interface WordPressPost {
       source_url?: string;
     }>;
   };
+  customSourceName?: string;
+  customSourceLogo?: string;
+  customDomainBadge?: string;
 }

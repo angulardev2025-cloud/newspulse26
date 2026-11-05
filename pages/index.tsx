@@ -15,31 +15,21 @@ import { NewsItem, WordPressPost } from '@/components/data/newsTypes';
 import ModernSourceGrid from '@/components/news/modernSourceGrid';
 
 import { useTheme } from '@/lib/context/ThemeContext';
+import { useBookmarks } from '@/lib/context/BookmarkContext';
 
 export default function Home() {
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
   const { darkMode, setDarkMode } = useTheme();
+  const { savedPosts, savedCount, isSaved, toggleBookmark, setSavedModalOpen } = useBookmarks();
   const { posts, loading, hasMore, fetchMore } = useNewsFeed();
   const [searchQuery, setSearchQuery] = useState("");
   const debouncedQuery = useDebounce(searchQuery, 400);
   const [selectedArticle, setSelectedArticle] = useState<NewsItem | null>(null);
-  const [savedPosts, setSavedPosts] = useState<WordPressPost[]>([]);
-  const [showSavedModal, setShowSavedModal] = useState(false);
   const [viewMode, setViewMode] = useState<'classic' | 'modern'>('classic');
 
   useEffect(() => {
     setMounted(true);
-    try {
-      const stored = localStorage.getItem('tv9_saved_posts');
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed)) setSavedPosts(parsed);
-      }
-    } catch (e) {
-      console.error('Failed to load saved posts:', e);
-    }
-    
     try {
       const storedView = localStorage.getItem('news_view_mode') as 'classic' | 'modern';
       if (storedView === 'classic' || storedView === 'modern') setViewMode(storedView);
@@ -55,12 +45,7 @@ export default function Home() {
   }, [viewMode, mounted]);
 
   const handleToggleBookmark = (post: WordPressPost) => {
-    setSavedPosts((prev) => {
-      const exists = prev.some((s) => s.id === post.id);
-      const updated = exists ? prev.filter((s) => s.id !== post.id) : [...prev, post];
-      localStorage.setItem('tv9_saved_posts', JSON.stringify(updated));
-      return updated;
-    });
+    toggleBookmark(post);
   };
 
   const handleSourceClick = (source: NewsSource) => {
@@ -81,8 +66,8 @@ export default function Home() {
         <Header
           darkMode={darkMode}
           setDarkMode={setDarkMode}
-          savedCount={savedPosts.length}
-          onOpenSaved={() => setShowSavedModal(true)}
+          savedCount={savedCount}
+          onOpenSaved={() => setSavedModalOpen(true)}
           viewMode={viewMode}
           setViewMode={setViewMode}
           breadcrumbs={[{ label: viewMode === 'modern' ? 'Modern Wire' : 'Classic Wire', isCurrent: true }]}
@@ -190,10 +175,9 @@ export default function Home() {
         <ArticleModal 
           article={selectedArticle} 
           onClose={() => setSelectedArticle(null)} 
-          isBookmarked={selectedArticle ? savedPosts.some((s) => s.link === selectedArticle.url) : false} 
+          isBookmarked={selectedArticle ? isSaved(selectedArticle.url || selectedArticle.name) : false} 
           onToggleBookmark={(art) => { 
-              const match = savedPosts.find((p) => p && p.link === art.url);
-              if (match) handleToggleBookmark(match); 
+            toggleBookmark(art); 
           }} 
         />
         <OfflineIndicator />

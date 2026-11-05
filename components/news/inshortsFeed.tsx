@@ -11,6 +11,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import GoogleLoader from '../utility/loader';
 import DailyRitualLoader from '../utility/dailyRitualLoader';
 import { useRouter } from 'next/router';
+import ReadingProgressBar from '../utility/readingProgressBar';
 
 interface InshortsFeedProps {
   posts: WordPressPost[];
@@ -163,8 +164,27 @@ const ArticleCard = React.forwardRef<HTMLDivElement, ArticleCardProps>(({
           </motion.div>
         </div>
 
-        {/* Story Index (e.g. 1/300, 301/600 for 30 sources, or 1/10 for single) */}
-        <div className="absolute top-safe pt-4 right-4 z-10">
+        {/* Story Index & Quick Bookmark */}
+        <div className="absolute top-safe pt-4 right-4 z-10 flex items-center gap-2">
+          <motion.button
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            onClick={(e: React.MouseEvent) => {
+              e.stopPropagation();
+              onToggleBookmark();
+            }}
+            className={`p-2 rounded-full backdrop-blur-md transition-all active:scale-90 border shadow-md flex items-center justify-center ${
+              isSaved
+                ? 'bg-red-600 text-white border-red-500 shadow-red-600/30'
+                : 'bg-black/60 text-white border-white/20 hover:bg-black/80'
+            }`}
+            title={isSaved ? 'Saved to collection (offline available)' : 'Bookmark for offline viewing'}
+            aria-label={isSaved ? 'Saved to collection' : 'Bookmark article'}
+          >
+            <Bookmark className={`w-3.5 h-3.5 ${isSaved ? 'fill-current' : ''}`} />
+          </motion.button>
+
           <motion.span 
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -261,10 +281,16 @@ const ArticleCard = React.forwardRef<HTMLDivElement, ArticleCardProps>(({
         <div className="flex items-center gap-3">
           <button 
             onClick={(e) => { e.stopPropagation(); onToggleBookmark(); }}
-            className={`p-3 rounded-2xl transition-all active:scale-90 ${isSaved ? 'bg-red-600 text-white shadow-md' : 'bg-white dark:bg-stone-800 text-stone-600 dark:text-stone-300 border border-stone-200 dark:border-stone-700 hover:bg-stone-100'}`}
+            className={`p-3 rounded-2xl transition-all active:scale-90 flex items-center gap-1.5 ${
+              isSaved 
+                ? 'bg-red-600 text-white shadow-md shadow-red-600/20' 
+                : 'bg-white dark:bg-stone-800 text-stone-600 dark:text-stone-300 border border-stone-200 dark:border-stone-700 hover:bg-stone-100'
+            }`}
             aria-label="Bookmark article"
+            title={isSaved ? "Saved to Collection (Offline Available)" : "Save to Offline Collection"}
           >
             <Bookmark className={`w-4 h-4 ${isSaved ? 'fill-current' : ''}`} />
+            <span className="text-xs font-bold hidden sm:inline">{isSaved ? 'Saved' : 'Save'}</span>
           </button>
           <button 
             onClick={(e) => { e.stopPropagation(); onShare(); }}
@@ -413,12 +439,14 @@ export default function InshortsFeed({
   }
 
   const currentPost = posts[currentIndex] || posts[0];
+  const progressPercent = posts.length > 0 ? Math.round(((currentIndex + 1) / posts.length) * 100) : 0;
 
   return (
     <div 
       onWheel={handleWheel}
       className="relative w-full h-[calc(100vh-65px)] h-[calc(100dvh-65px)] max-w-2xl mx-auto overflow-hidden bg-stone-100 dark:bg-stone-950 sm:py-4"
     >
+      <ReadingProgressBar progress={progressPercent} />
       <AnimatePresence initial={false} custom={direction} mode="popLayout">
         {currentPost && (
           <ArticleCard

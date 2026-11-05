@@ -61,7 +61,12 @@ export default function ArticleModal({
             </span>
           </div>
           <div className="flex items-center gap-2">
-            <button onClick={() => onToggleBookmark(article)} className={`p-2 rounded-lg ${isBookmarked ? 'text-amber-600 bg-amber-50' : 'text-stone-500'}`}>
+            <button 
+              onClick={() => onToggleBookmark(article)} 
+              className={`p-2 rounded-xl transition-all active:scale-95 ${isBookmarked ? 'text-red-600 bg-red-50 dark:bg-red-950/40' : 'text-stone-500 hover:text-stone-800 dark:hover:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800'}`}
+              title={isBookmarked ? 'Saved to Collection (Offline Available)' : 'Bookmark for Offline Viewing'}
+              aria-label={isBookmarked ? 'Remove bookmark' : 'Bookmark article'}
+            >
               <Bookmark className={`w-5 h-5 ${isBookmarked ? 'fill-current' : ''}`} />
             </button>
             <button onClick={handleShare} className="p-2 rounded-lg text-stone-500">
