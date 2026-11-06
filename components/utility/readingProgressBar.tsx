@@ -12,9 +12,11 @@ interface ReadingProgressBarProps {
 }
 
 export default function ReadingProgressBar({ progress: customProgress }: ReadingProgressBarProps) {
+  const [mounted, setMounted] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
 
   useEffect(() => {
+    setMounted(true);
     if (typeof customProgress === 'number' && !isNaN(customProgress)) {
       setScrollProgress(Math.min(100, Math.max(0, customProgress)));
       return;
@@ -44,6 +46,8 @@ export default function ReadingProgressBar({ progress: customProgress }: Reading
       window.removeEventListener('resize', calculateScroll);
     };
   }, [customProgress]);
+
+  if (!mounted) return null;
 
   return (
     <div className="fixed top-0 left-0 right-0 h-1 z-[60] bg-stone-200/40 dark:bg-stone-800/40 pointer-events-none">

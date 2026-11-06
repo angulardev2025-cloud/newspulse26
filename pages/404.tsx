@@ -34,3 +34,9 @@ export default function Custom404() {
     </div>
   );
 }
+
+export async function getStaticProps() {
+  return {
+    props: {},
+  };
+}

@@ -11,8 +11,10 @@ export function PWAInstallButton() {
   const [isInstalled, setIsInstalled] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
   const [showIOSGuide, setShowIOSGuide] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     const isStandalone =
       window.matchMedia('(display-mode: standalone)').matches ||
       (window.navigator as unknown as { standalone?: boolean }).standalone === true;
@@ -51,7 +53,7 @@ export function PWAInstallButton() {
     }
   };
 
-  if (isInstalled) return null;
+  if (!mounted || isInstalled) return null;
 
   if (deferredPrompt) {
     return (
@@ -107,11 +109,14 @@ export function PWAInstallButton() {
 }
 
 export function OfflineIndicator() {
-  const [isOnline, setIsOnline] = useState(
-    typeof navigator !== 'undefined' ? navigator.onLine : true
-  );
+  const [isOnline, setIsOnline] = useState(true);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
+    if (typeof navigator !== 'undefined') {
+      setIsOnline(navigator.onLine);
+    }
     const handleOnline = () => setIsOnline(true);
     const handleOffline = () => setIsOnline(false);
 
@@ -124,7 +129,7 @@ export function OfflineIndicator() {
     };
   }, []);
 
-  if (isOnline) return null;
+  if (!mounted || isOnline) return null;
 
   return (
     <div className="fixed bottom-4 left-4 z-50 flex items-center gap-2 rounded-lg bg-amber-500 px-3 py-2 text-xs font-medium text-white shadow-lg animate-bounce">
