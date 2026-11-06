@@ -39,17 +39,25 @@ export async function fetchRest(endpoint: string, page: number) {
     });
     data = res.data;
   } catch (error: any) {
+    // 2. Fallback to Proxy 1 (AllOrigins)
     try {
-      const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
-      const proxyRes = await axios.get(proxyUrl, { timeout: 7000 });
-      data = proxyRes.data;
-    } catch (proxyErr: any) {
-      const errStatus = error.response?.status || proxyErr.response?.status || (error.code === 'ECONNABORTED' ? 504 : 502);
-      const errMsg = error.response?.data?.message || error.message || proxyErr.message || 'REST API feed request failed.';
-      const fetchError: any = new Error(errMsg);
-      fetchError.status = errStatus;
-      fetchError.response = error.response || proxyErr.response;
-      throw fetchError;
+      const proxyUrl1 = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
+      const proxyRes1 = await axios.get(proxyUrl1, { timeout: 7000 });
+      data = proxyRes1.data;
+    } catch (proxyErr1: any) {
+      // 3. Fallback to Proxy 2 (CorsProxy.io)
+      try {
+        const proxyUrl2 = `https://corsproxy.io/?${encodeURIComponent(url)}`;
+        const proxyRes2 = await axios.get(proxyUrl2, { timeout: 7000 });
+        data = proxyRes2.data;
+      } catch (proxyErr2: any) {
+        const errStatus = error.response?.status || proxyErr1.response?.status || proxyErr2.response?.status || (error.code === 'ECONNABORTED' ? 504 : 502);
+        const errMsg = error.response?.data?.message || error.message || proxyErr1.message || proxyErr2.message || 'REST API feed request failed.';
+        const fetchError: any = new Error(errMsg);
+        fetchError.status = errStatus;
+        fetchError.response = error.response || proxyErr1.response || proxyErr2.response;
+        throw fetchError;
+      }
     }
   }
 
