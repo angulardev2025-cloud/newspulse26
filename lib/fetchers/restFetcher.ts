@@ -39,6 +39,9 @@ export async function fetchRest(endpoint: string, page: number) {
     });
     data = res.data;
   } catch (error: any) {
+    // Smartly handle 403/errors: wait 3s before attempting proxy fallback
+    await new Promise(resolve => setTimeout(resolve, 3000));
+
     // 2. Fallback to Proxy 1 (AllOrigins)
     try {
       const proxyUrl1 = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
