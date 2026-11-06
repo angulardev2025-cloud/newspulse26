@@ -64,6 +64,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     } else {
       // Aggregate, shuffle & remix from ALL active Coastal & Kannada publisher sources
       const activeSources = newsSources.filter(s => s.id !== 'all' && s.endpoint);
+      let totalFailed = 0;
+      let lastErr: any = null;
       
       const results = await Promise.all(
         activeSources.map(async (s) => {
@@ -82,8 +84,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
               customCategory: s.category,
               customDomainBadge: extractDomainBadge(s.endpoint || item.link),
             }));
-          } catch (err) {
-            // Gracefully skip any source endpoint that is offline or failing
+          } catch (err: any) {
+            totalFailed++;
+            lastErr = err;
+            // Gracefully skip single offline endpoint if others succeeded
             return [];
           }
         })
@@ -93,6 +97,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const allFetched = results
         .flat()
         .filter((item): item is any => Boolean(item && item.date && item.title?.rendered));
+
+      if (allFetched.length === 0 && totalFailed === activeSources.length && lastErr) {
+        throw lastErr;
+      }
 
       // Strictly sort by published timestamp (newest first)
       posts = allFetched.sort((a, b) => {
@@ -120,7 +128,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(200).json(posts || []);
   } catch (error: any) {
     const status = error.response?.status || (error.status ? parseInt(error.status, 10) : 500);
-    console.error(`API Fetch Error (${status}):`, error.message || error);
+    const statusText = error.response?.statusText || (
+      status === 404 ? 'Not Found' :
+      status === 403 ? 'Forbidden' :
+      status === 401 ? 'Unauthorized' :
+      status === 429 ? 'Too Many Requests' :
+      status === 502 ? 'Bad Gateway' :
+      status === 504 ? 'Gateway Timeout' : 'Internal Server Error'
+    );
+    const message = error.response?.data?.message || error.message || `API fetch failed with HTTP status ${status}.`;
+    console.error(`API Fetch Error (${status} - ${statusText}):`, message);
 
     // Fallback: If live fetch fails, try serving stale server cache if available
     const staleData = postsCache.get(cacheKey)?.data;
@@ -132,7 +149,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(status).json({ 
       error: 'Failed to fetch news', 
       status, 
-      message: 'nothing to show to back to home page' 
+      statusText,
+      message,
+      endpoint: targetSource?.endpoint || `/api/posts?source=${source}&page=${page}`,
+      sourceId: String(source),
+      timestamp: new Date().toISOString(),
+      details: error.response?.data ? JSON.stringify(error.response.data) : (error.stack || error.message)
     });
   }
 }

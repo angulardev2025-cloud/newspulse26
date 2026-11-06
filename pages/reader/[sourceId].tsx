@@ -27,7 +27,7 @@ const allSource: NewsSource = {
 export default function ReaderPage({ initialSourceId }: { initialSourceId?: string }) {
   const router = useRouter();
   const sourceId = router.query.sourceId || initialSourceId;
-  const { posts, loading, hasMore, fetchMore } = useNewsFeed();
+  const { posts, loading, error, clearError, hasMore, fetchMore } = useNewsFeed();
   const { darkMode, setDarkMode } = useTheme();
   const { savedPosts, savedCount, toggleBookmark, setSavedModalOpen } = useBookmarks();
   
@@ -148,6 +148,13 @@ export default function ReaderPage({ initialSourceId }: { initialSourceId?: stri
             onLoadMore={loadMore}
             hasMore={hasMore}
             loadingMore={loading}
+            error={error}
+            onRetry={() => {
+              if (selectedSource) {
+                clearError();
+                fetchMore(selectedSource.id, '', 1, false);
+              }
+            }}
             sourceName={selectedSource?.kannadaName}
             language={selectedSource?.language as 'kn' | 'en'}
           />

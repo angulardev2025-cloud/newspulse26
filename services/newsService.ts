@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { WordPressPost } from '@/components/data/newsTypes';
+import { WordPressPost, ApiErrorInfo } from '@/components/data/newsTypes';
 
 const CACHE_PREFIX = 'np_news_cache_';
 const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes TTL
@@ -42,6 +42,11 @@ const pruneCache = () => {
   }
 };
 
+export interface FetchNewsResult {
+  posts: WordPressPost[];
+  error?: ApiErrorInfo | null;
+}
+
 /**
  * Smart fetcher with localStorage caching and stale-while-revalidate capabilities.
  * Reduces API calls by serving fresh cached feeds instantly.
@@ -51,7 +56,7 @@ export const fetchNewsFeed = async (
   searchQuery: string = '',
   page: number = 1,
   forceRefresh: boolean = false
-): Promise<WordPressPost[]> => {
+): Promise<FetchNewsResult> => {
   const cacheKey = `${CACHE_PREFIX}${sourceId}_p${page}_q${searchQuery.trim().toLowerCase()}`;
 
   // 1. Try reading from localStorage cache if forceRefresh is false
@@ -64,7 +69,7 @@ export const fetchNewsFeed = async (
         
         if (age < CACHE_TTL_MS && Array.isArray(parsed.posts) && parsed.posts.length > 0) {
           // Serve instantly from local cache (0ms delay)
-          return parsed.posts;
+          return { posts: parsed.posts, error: null };
         }
       }
     } catch (e) {
@@ -84,7 +89,7 @@ export const fetchNewsFeed = async (
 
     const posts = Array.isArray(res.data) ? res.data : [];
 
-    // 3. Save response to localStorage cache if posts exist
+    // Save response to localStorage cache if posts exist
     if (typeof window !== 'undefined' && posts.length > 0) {
       try {
         const payload: CachePayload = {
@@ -98,23 +103,45 @@ export const fetchNewsFeed = async (
       }
     }
 
-    return posts;
-  } catch (error) {
+    return { posts, error: null };
+  } catch (error: any) {
     console.error('Service: Failed to fetch posts from API:', error);
 
-    // 4. Offline / Error Fallback: Return stale cached data if available
+    const responseData = error.response?.data;
+    const status = responseData?.status || error.response?.status || (error.status ? parseInt(error.status, 10) : 500);
+    const statusText = responseData?.statusText || error.response?.statusText || (
+      status === 404 ? 'Not Found' :
+      status === 403 ? 'Forbidden' :
+      status === 401 ? 'Unauthorized' :
+      status === 429 ? 'Too Many Requests' :
+      status === 502 ? 'Bad Gateway' :
+      status === 504 ? 'Gateway Timeout' : 'API Error'
+    );
+    const message = responseData?.message || responseData?.error || error.message || `API endpoint request failed with status ${status}`;
+
+    const apiError: ApiErrorInfo = {
+      status,
+      statusText,
+      message,
+      endpoint: responseData?.endpoint || `/api/posts?source=${sourceId}&page=${page}`,
+      sourceId,
+      timestamp: responseData?.timestamp || new Date().toISOString(),
+      details: responseData?.details || (responseData ? JSON.stringify(responseData, null, 2) : error.stack),
+    };
+
+    // 3. Offline / Error Fallback: Return stale cached data if available along with error
     if (typeof window !== 'undefined') {
       try {
         const cached = localStorage.getItem(cacheKey);
         if (cached) {
           const parsed: CachePayload = JSON.parse(cached);
           if (Array.isArray(parsed.posts) && parsed.posts.length > 0) {
-            return parsed.posts;
+            return { posts: parsed.posts, error: apiError };
           }
         }
       } catch (e) {}
     }
 
-    return [];
+    return { posts: [], error: apiError };
   }
 };

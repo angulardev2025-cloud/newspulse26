@@ -37,3 +37,14 @@ export interface WordPressPost {
   customSourceLogo?: string;
   customDomainBadge?: string;
 }
+
+export interface ApiErrorInfo {
+  status: number | string;
+  statusText?: string;
+  message: string;
+  endpoint?: string;
+  sourceId?: string;
+  sourceName?: string;
+  timestamp?: string;
+  details?: string;
+}

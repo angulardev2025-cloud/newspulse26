@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { Bookmark, Share2, ExternalLink, Clock, Check, ChevronUp, ChevronDown, AlertCircle, Home, Globe, BookOpen } from 'lucide-react';
 import { dateFormat } from '../utility/dateFormat';
-import { WordPressPost } from '@/components/data/newsTypes';
+import { WordPressPost, ApiErrorInfo } from '@/components/data/newsTypes';
 import { newsSources, extractDomainBadge } from '@/components/data/newsSources';
 import { calculateReadingTime } from '@/lib/utility/readingTime';
 import Image from 'next/image';
@@ -12,6 +12,7 @@ import GoogleLoader from '../utility/loader';
 import DailyRitualLoader from '../utility/dailyRitualLoader';
 import { useRouter } from 'next/router';
 import ReadingProgressBar from '../utility/readingProgressBar';
+import ApiErrorBanner from '../utility/apiErrorBanner';
 
 interface InshortsFeedProps {
   posts: WordPressPost[];
@@ -20,7 +21,8 @@ interface InshortsFeedProps {
   onLoadMore: () => void;
   hasMore: boolean;
   loadingMore: boolean;
-  error?: string | null;
+  error?: ApiErrorInfo | string | null;
+  onRetry?: () => void;
   sourceName?: string;
   language?: 'kn' | 'en';
 }
@@ -325,6 +327,7 @@ export default function InshortsFeed({
   hasMore,
   loadingMore,
   error,
+  onRetry,
   sourceName = 'NewsPulse',
   language = 'kn',
 }: InshortsFeedProps) {
@@ -415,24 +418,37 @@ export default function InshortsFeed({
     return <DailyRitualLoader sourceName={sourceName} targetCount={targetBatchTotal} />;
   }
 
-  // Graceful Error & Empty state
-  if (error || (!loadingMore && (!posts || posts.length === 0))) {
+  // Graceful Error & Empty state when no posts are available
+  if (!loadingMore && (!posts || posts.length === 0)) {
+    const errorInfo: ApiErrorInfo = error
+      ? typeof error === 'string'
+        ? { status: 500, message: error, timestamp: new Date().toISOString() }
+        : error
+      : {
+          status: 404,
+          statusText: 'No Stories Found',
+          message: `No news posts found for "${sourceName}".`,
+          sourceName,
+          timestamp: new Date().toISOString(),
+        };
+
     return (
-      <div className="h-screen h-[100dvh] w-full flex flex-col items-center justify-center text-stone-500 bg-white dark:bg-stone-950 px-6 text-center gap-6">
-        <div className="max-w-md w-full p-8 bg-stone-50 dark:bg-stone-900 rounded-3xl border border-stone-200 dark:border-stone-800 shadow-2xl flex flex-col items-center gap-5">
-          <div className="w-14 h-14 rounded-full bg-red-100 dark:bg-red-950/50 flex items-center justify-center text-red-600 dark:text-red-400 shadow-inner">
-            <AlertCircle className="w-7 h-7" />
+      <div className="min-h-[80vh] w-full flex flex-col items-center justify-center bg-stone-50 dark:bg-stone-950 p-4 sm:p-8">
+        <div className="max-w-lg w-full">
+          <ApiErrorBanner
+            error={errorInfo}
+            onRetry={onRetry || onLoadMore}
+            title={`Unable to load live wire for ${sourceName}`}
+          />
+          <div className="mt-4 flex justify-center">
+            <button
+              onClick={() => router.push('/')}
+              className="px-8 py-3 bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 rounded-full font-bold text-xs uppercase tracking-wider shadow-md hover:bg-red-600 dark:hover:bg-red-600 dark:hover:text-white transition-all flex items-center gap-2"
+            >
+              <Home className="w-4 h-4" />
+              <span>Back to Home Wire</span>
+            </button>
           </div>
-          <p className="text-xl font-serif font-bold text-stone-800 dark:text-stone-200 leading-snug">
-            nothing to show to back to home page
-          </p>
-          <button 
-            onClick={() => router.push('/')} 
-            className="mt-2 px-8 py-3.5 bg-red-600 hover:bg-red-700 text-white rounded-full font-bold text-sm transition-all shadow-lg active:scale-95 flex items-center gap-2.5"
-          >
-            <Home className="w-4 h-4" />
-            <span>Back to Home Page</span>
-          </button>
         </div>
       </div>
     );
@@ -444,9 +460,21 @@ export default function InshortsFeed({
   return (
     <div 
       onWheel={handleWheel}
-      className="relative w-full h-[calc(100vh-65px)] h-[calc(100dvh-65px)] max-w-2xl mx-auto overflow-hidden bg-stone-100 dark:bg-stone-950 sm:py-4"
+      className="relative w-full h-[calc(100vh-65px)] h-[calc(100dvh-65px)] max-w-2xl mx-auto overflow-hidden bg-stone-100 dark:bg-stone-950 sm:py-4 flex flex-col"
     >
       <ReadingProgressBar progress={progressPercent} />
+
+      {/* Floating Error Banner if live update failed but cached stories exist */}
+      {error && (
+        <div className="px-3 pt-2 z-20 shrink-0">
+          <ApiErrorBanner
+            error={error}
+            compact
+            onRetry={onRetry || onLoadMore}
+            title="Live update warning"
+          />
+        </div>
+      )}
       <AnimatePresence initial={false} custom={direction} mode="popLayout">
         {currentPost && (
           <ArticleCard

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { Newspaper, Bookmark, Sun, Moon, LayoutGrid, LayoutList, Menu, X, Globe, Sparkles, Monitor } from 'lucide-react';
+import { Newspaper, Bookmark, Sun, Moon, LayoutGrid, LayoutList, Menu, X, Globe, Sparkles, Monitor, Activity } from 'lucide-react';
 import { PWAInstallButton } from '../utility/pwaInstall';
 import CompactClock from '../utility/clock';
 import Breadcrumbs, { BreadcrumbItem } from '../utility/breadcrumbs';
@@ -99,6 +99,15 @@ export default function Header({
 
           {/* Zone 3: Actions & Mobile Hamburger */}
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            <Link
+              href="/api-health"
+              className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-stone-700 dark:text-stone-300 bg-stone-100 dark:bg-stone-800 rounded-lg hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors whitespace-nowrap min-h-[38px] border border-stone-200/60 dark:border-stone-700/60"
+              title="API Health Diagnostics Table"
+            >
+              <Activity className="w-4 h-4 text-red-600" />
+              <span className="hidden md:inline">API Monitor</span>
+            </Link>
+
             <div className="hidden sm:block">
               <PWAInstallButton />
             </div>
@@ -235,7 +244,7 @@ export default function Header({
             </div>
 
             {/* Quick Actions */}
-            <div className="p-4 border-b border-stone-100 dark:border-stone-800 flex items-center justify-between">
+            <div className="p-4 border-b border-stone-100 dark:border-stone-800 flex items-center justify-between gap-2 flex-wrap">
               <button
                 onClick={() => {
                   setMobileMenuOpen(false);
@@ -251,7 +260,15 @@ export default function Header({
                   </span>
                 )}
               </button>
-              <PWAInstallButton />
+
+              <Link
+                href="/api-health"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 text-xs font-bold border border-red-200/80 dark:border-red-900/40"
+              >
+                <Activity className="w-4 h-4" />
+                <span>API Health Table</span>
+              </Link>
             </div>
 
             {/* News Sources Quick Nav */}

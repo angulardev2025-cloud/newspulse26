@@ -31,7 +31,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     return res.status(200).json(latestPosts);
   } catch (error: any) {
-    console.error('Sources Latest API Error:', error.message);
-    return res.status(500).json({ error: 'Failed to fetch latest posts' });
+    const status = error.response?.status || 500;
+    console.error('Sources Latest API Error:', error.message || error);
+    return res.status(status).json({ 
+      error: 'Failed to fetch latest posts',
+      status,
+      statusText: 'Internal Server Error',
+      message: error.message || 'An unexpected error occurred while querying latest source posts.',
+      endpoint: '/api/sources-latest',
+      timestamp: new Date().toISOString()
+    });
   }
 }

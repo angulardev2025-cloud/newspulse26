@@ -56,8 +56,13 @@ export async function fetchWordPress(endpoint: string, page: number) {
       const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
       const proxyRes = await axios.get(proxyUrl, { timeout: 7000 });
       data = proxyRes.data;
-    } catch (proxyErr) {
-      return [];
+    } catch (proxyErr: any) {
+      const errStatus = error.response?.status || proxyErr.response?.status || (error.code === 'ECONNABORTED' ? 504 : 502);
+      const errMsg = error.response?.data?.message || error.message || proxyErr.message || 'WordPress feed request failed.';
+      const fetchError: any = new Error(errMsg);
+      fetchError.status = errStatus;
+      fetchError.response = error.response || proxyErr.response;
+      throw fetchError;
     }
   }
 

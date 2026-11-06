@@ -9,10 +9,11 @@ import { OfflineIndicator } from '@/components/utility/pwaInstall';
 import { newsSources, NewsSource } from '@/components/data/newsSources';
 import { useNewsFeed } from '@/lib/hooks/useNewsFeed';
 import LogoSVG from '@/components/utility/logo';
-import { ArrowLeft, Globe, Newspaper, Shuffle, ArrowRight } from 'lucide-react';
+import { ArrowLeft, Globe, Newspaper, Shuffle, ArrowRight, Activity, ShieldCheck, Server } from 'lucide-react';
 import { useRouter } from 'next/router';
 import { NewsItem, WordPressPost } from '@/components/data/newsTypes';
 import ModernSourceGrid from '@/components/news/modernSourceGrid';
+import ApiErrorBanner from '@/components/utility/apiErrorBanner';
 
 import { useTheme } from '@/lib/context/ThemeContext';
 import { useBookmarks } from '@/lib/context/BookmarkContext';
@@ -22,7 +23,7 @@ export default function Home() {
   const [mounted, setMounted] = useState(false);
   const { darkMode, setDarkMode } = useTheme();
   const { savedPosts, savedCount, isSaved, toggleBookmark, setSavedModalOpen } = useBookmarks();
-  const { posts, loading, hasMore, fetchMore } = useNewsFeed();
+  const { posts, loading, error, clearError, hasMore, fetchMore } = useNewsFeed();
   const [searchQuery, setSearchQuery] = useState("");
   const debouncedQuery = useDebounce(searchQuery, 400);
   const [selectedArticle, setSelectedArticle] = useState<NewsItem | null>(null);
@@ -86,6 +87,17 @@ export default function Home() {
             </div>
           </div>
 
+          {error && (
+            <div className="mb-8">
+              <ApiErrorBanner
+                error={error}
+                onRetry={() => fetchMore('all', searchQuery, 1, false)}
+                onDismiss={clearError}
+                title="Live News API Status Warning"
+              />
+            </div>
+          )}
+
           {(() => {
             const query = debouncedQuery.toLowerCase().trim();
             const filteredSources = newsSources.filter((s) => {
@@ -131,6 +143,48 @@ export default function Home() {
                          </div>
                          <button className="px-6 py-2.5 bg-white text-red-600 rounded-2xl font-black text-xs uppercase tracking-wider shadow-lg flex items-center gap-2 group-hover:gap-3 transition-all">
                             <span>Start Remix</span>
+                            <ArrowRight className="w-4 h-4" />
+                         </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* API Health Monitor Card */}
+                {!query && (
+                  <div 
+                    onClick={() => router.push('/api-health').catch(() => {})} 
+                    className="group p-8 bg-stone-900 dark:bg-stone-900 text-white rounded-[2.5rem] cursor-pointer hover:scale-[1.02] active:scale-95 transition-all flex flex-col justify-between shadow-2xl border border-stone-800 min-h-[320px] relative overflow-hidden"
+                  >
+                    <div className="absolute top-0 right-0 p-6 opacity-10 pointer-events-none">
+                      <Activity className="w-48 h-48 text-red-500" />
+                    </div>
+
+                    <div className="flex items-center justify-between relative z-10">
+                      <div className="p-4 bg-red-600/20 text-red-500 rounded-3xl backdrop-blur-md border border-red-500/30">
+                        <Activity className="w-7 h-7" />
+                      </div>
+                      <div className="flex flex-col items-end gap-2">
+                        <div className="px-3 py-1 bg-red-600/20 text-red-400 rounded-full text-[10px] font-black uppercase tracking-widest backdrop-blur-md border border-red-500/30 flex items-center gap-1.5">
+                          <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                          <span>Live Health Monitor</span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="mt-8 relative z-10">
+                      <h3 className="text-2xl md:text-3xl font-bold font-serif leading-tight">API Diagnostics Table</h3>
+                      <p className="text-stone-400 text-sm mt-3 leading-relaxed">
+                        Test all 25+ Coastal & Kannada publisher APIs sequentially with 3s throttle, HTTP response codes, and AllOrigins proxy logs.
+                      </p>
+                      
+                      <div className="mt-6 flex items-center justify-between border-t border-stone-800 pt-5">
+                         <div className="flex flex-col">
+                            <span className="text-[9px] font-bold uppercase text-stone-500 tracking-widest">Inspection</span>
+                            <span className="text-xs font-bold text-stone-200">25+ Endpoints & Proxy</span>
+                         </div>
+                         <button className="px-6 py-2.5 bg-red-600 text-white rounded-2xl font-black text-xs uppercase tracking-wider shadow-lg flex items-center gap-2 group-hover:gap-3 transition-all">
+                            <span>Open Monitor</span>
                             <ArrowRight className="w-4 h-4" />
                          </button>
                       </div>
@@ -185,10 +239,4 @@ export default function Home() {
       </div>
     </>
   );
-}
-
-export async function getServerSideProps() {
-  return {
-    props: {},
-  };
 }
